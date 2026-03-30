@@ -58,6 +58,11 @@ class MoreScreen extends ConsumerWidget {
           const Divider(height: 1),
 
           _MenuItem(
+            icon: Icons.people,
+            title: 'Member Directory',
+            onTap: () => context.go('/member-directory'),
+          ),
+          _MenuItem(
             icon: Icons.support_agent,
             title: 'Tickets',
             onTap: () => _showComingSoon(context),

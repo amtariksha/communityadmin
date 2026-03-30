@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:community_admin/providers/service_providers.dart';
 
 class UnitsScreen extends ConsumerStatefulWidget {
@@ -57,114 +58,6 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
         });
       }
     }
-  }
-
-  void _showMembersSheet(Map<String, dynamic> unit) async {
-    final unitService = ref.read(unitServiceProvider);
-    final unitId = unit['id'] as String;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          maxChildSize: 0.85,
-          minChildSize: 0.3,
-          expand: false,
-          builder: (context, scrollController) {
-            return FutureBuilder<List<dynamic>>(
-              future: unitService.getUnitMembers(unitId),
-              builder: (context, snapshot) {
-                return Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Unit ${unit['unit_number'] ?? unit['unitNumber'] ?? ''}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Block ${unit['block'] ?? ''} | Floor ${unit['floor'] ?? ''}',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      const Divider(height: 24),
-                      Text(
-                        'Members',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (snapshot.connectionState == ConnectionState.waiting)
-                        const Center(child: CircularProgressIndicator())
-                      else if (snapshot.hasError)
-                        const Text('Failed to load members')
-                      else if (snapshot.data?.isEmpty ?? true)
-                        Text(
-                          'No members found',
-                          style: TextStyle(color: Colors.grey.shade500),
-                        )
-                      else
-                        Expanded(
-                          child: ListView.builder(
-                            controller: scrollController,
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) {
-                              final member =
-                                  snapshot.data![index] as Map<String, dynamic>;
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: Colors.grey.shade200,
-                                  child: Text(
-                                    (member['name'] as String? ?? '?')[0]
-                                        .toUpperCase(),
-                                  ),
-                                ),
-                                title: Text(member['name'] as String? ?? ''),
-                                subtitle: Text(
-                                  member['member_type'] as String? ??
-                                      member['memberType'] as String? ??
-                                      '',
-                                ),
-                                trailing: Text(
-                                  member['phone'] as String? ?? '',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade500,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
   }
 
   @override
@@ -257,18 +150,51 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
                                 final area = unit['area'] ?? '';
                                 final isOccupied =
                                     unit['is_occupied'] ?? unit['isOccupied'] ?? false;
+                                final ownerName =
+                                    unit['owner_name'] ?? unit['ownerName'] ?? '';
+                                final tenantName =
+                                    unit['tenant_name'] ?? unit['tenantName'] ?? '';
+                                final unitId = unit['id'] as String;
 
                                 return Card(
                                   margin: const EdgeInsets.only(bottom: 8),
                                   child: ListTile(
-                                    onTap: () => _showMembersSheet(unit),
+                                    onTap: () => context.push('/units/$unitId'),
                                     title: Text(
                                       'Unit $unitNumber',
                                       style: const TextStyle(
                                           fontWeight: FontWeight.w600),
                                     ),
-                                    subtitle: Text(
-                                      'Block $block | Floor $floor${area != '' ? ' | $area sq ft' : ''}',
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Block $block | Floor $floor${area.toString().isNotEmpty ? ' | $area sq ft' : ''}',
+                                        ),
+                                        if (ownerName.toString().isNotEmpty ||
+                                            tenantName.toString().isNotEmpty)
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 4),
+                                            child: Text(
+                                              [
+                                                if (ownerName
+                                                    .toString()
+                                                    .isNotEmpty)
+                                                  'Owner: $ownerName',
+                                                if (tenantName
+                                                    .toString()
+                                                    .isNotEmpty)
+                                                  'Tenant: $tenantName',
+                                              ].join(' | '),
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                     trailing: Container(
                                       padding: const EdgeInsets.symmetric(
