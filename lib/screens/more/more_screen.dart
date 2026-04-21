@@ -65,7 +65,7 @@ class MoreScreen extends ConsumerWidget {
           _MenuItem(
             icon: Icons.support_agent,
             title: 'Tickets',
-            onTap: () => _showComingSoon(context),
+            onTap: () => context.go('/tickets'),
           ),
           _MenuItem(
             icon: Icons.campaign,

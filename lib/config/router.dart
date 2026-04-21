@@ -12,6 +12,9 @@ import 'package:community_admin/screens/units/member_directory_screen.dart';
 import 'package:community_admin/screens/finance/finance_screen.dart';
 import 'package:community_admin/screens/gate/gate_screen.dart';
 import 'package:community_admin/screens/more/more_screen.dart';
+import 'package:community_admin/screens/tickets/tickets_screen.dart';
+import 'package:community_admin/screens/tickets/ticket_detail_screen.dart';
+import 'package:community_admin/screens/tickets/create_ticket_screen.dart';
 import 'package:community_admin/widgets/app_shell.dart';
 
 /// Listenable that only notifies when isAuthenticated changes
@@ -108,6 +111,20 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/more',
             builder: (context, state) => const MoreScreen(),
+          ),
+          GoRoute(
+            path: '/tickets',
+            builder: (context, state) => const TicketsScreen(),
+          ),
+          GoRoute(
+            path: '/tickets/new',
+            builder: (context, state) => const CreateTicketScreen(),
+          ),
+          GoRoute(
+            path: '/tickets/:id',
+            builder: (context, state) => TicketDetailScreen(
+              ticketId: state.pathParameters['id']!,
+            ),
           ),
         ],
       ),
