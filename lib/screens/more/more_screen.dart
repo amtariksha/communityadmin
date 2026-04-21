@@ -70,12 +70,17 @@ class MoreScreen extends ConsumerWidget {
           _MenuItem(
             icon: Icons.campaign,
             title: 'Announcements',
-            onTap: () => _showComingSoon(context),
+            onTap: () => context.go('/announcements'),
           ),
           _MenuItem(
             icon: Icons.badge,
             title: 'Staff',
-            onTap: () => _showComingSoon(context),
+            onTap: () => context.go('/staff'),
+          ),
+          _MenuItem(
+            icon: Icons.task_alt,
+            title: 'Approvals',
+            onTap: () => context.go('/approvals'),
           ),
           _MenuItem(
             icon: Icons.assessment,

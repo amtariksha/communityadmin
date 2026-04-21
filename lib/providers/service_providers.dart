@@ -8,6 +8,8 @@ import 'package:community_admin/services/receipt_service.dart';
 import 'package:community_admin/services/gate_service.dart';
 import 'package:community_admin/services/ticket_service.dart';
 import 'package:community_admin/services/announcement_service.dart';
+import 'package:community_admin/services/staff_service.dart';
+import 'package:community_admin/services/approval_service.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
@@ -41,4 +43,12 @@ final ticketServiceProvider = Provider<TicketService>((ref) {
 
 final announcementServiceProvider = Provider<AnnouncementService>((ref) {
   return AnnouncementService(ref.read(apiClientProvider));
+});
+
+final staffServiceProvider = Provider<StaffService>((ref) {
+  return StaffService(ref.read(apiClientProvider));
+});
+
+final approvalServiceProvider = Provider<ApprovalService>((ref) {
+  return ApprovalService(ref.read(apiClientProvider));
 });

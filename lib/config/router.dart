@@ -15,6 +15,12 @@ import 'package:community_admin/screens/more/more_screen.dart';
 import 'package:community_admin/screens/tickets/tickets_screen.dart';
 import 'package:community_admin/screens/tickets/ticket_detail_screen.dart';
 import 'package:community_admin/screens/tickets/create_ticket_screen.dart';
+import 'package:community_admin/screens/announcements/announcements_admin_screen.dart';
+import 'package:community_admin/screens/announcements/create_announcement_screen.dart';
+import 'package:community_admin/screens/staff/staff_list_screen.dart';
+import 'package:community_admin/screens/staff/leave_approvals_screen.dart';
+import 'package:community_admin/screens/staff/shifts_admin_screen.dart';
+import 'package:community_admin/screens/approvals/approvals_admin_screen.dart';
 import 'package:community_admin/widgets/app_shell.dart';
 
 /// Listenable that only notifies when isAuthenticated changes
@@ -125,6 +131,30 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => TicketDetailScreen(
               ticketId: state.pathParameters['id']!,
             ),
+          ),
+          GoRoute(
+            path: '/announcements',
+            builder: (context, state) => const AnnouncementsAdminScreen(),
+          ),
+          GoRoute(
+            path: '/announcements/new',
+            builder: (context, state) => const CreateAnnouncementScreen(),
+          ),
+          GoRoute(
+            path: '/staff',
+            builder: (context, state) => const StaffListScreen(),
+          ),
+          GoRoute(
+            path: '/staff/leaves',
+            builder: (context, state) => const LeaveApprovalsScreen(),
+          ),
+          GoRoute(
+            path: '/staff/shifts',
+            builder: (context, state) => const ShiftsAdminScreen(),
+          ),
+          GoRoute(
+            path: '/approvals',
+            builder: (context, state) => const ApprovalsAdminScreen(),
           ),
         ],
       ),
