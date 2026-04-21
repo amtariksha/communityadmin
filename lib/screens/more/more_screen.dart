@@ -103,6 +103,11 @@ class MoreScreen extends ConsumerWidget {
             onTap: () => context.go('/utility'),
           ),
           _MenuItem(
+            icon: Icons.document_scanner,
+            title: 'Scan Invoice (AI OCR)',
+            onTap: () => context.go('/scan-invoice'),
+          ),
+          _MenuItem(
             icon: Icons.assessment,
             title: 'Reports',
             onTap: () => _showComingSoon(context),

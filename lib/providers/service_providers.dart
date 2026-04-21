@@ -14,6 +14,8 @@ import 'package:community_admin/services/amenity_service.dart';
 import 'package:community_admin/services/voting_service.dart';
 import 'package:community_admin/services/document_service.dart';
 import 'package:community_admin/services/utility_service.dart';
+import 'package:community_admin/services/upload_service.dart';
+import 'package:community_admin/services/ocr_service.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
@@ -71,4 +73,12 @@ final documentServiceProvider = Provider<DocumentService>((ref) {
 
 final utilityServiceProvider = Provider<UtilityService>((ref) {
   return UtilityService(ref.read(apiClientProvider));
+});
+
+final uploadServiceProvider = Provider<UploadService>((ref) {
+  return UploadService(ref.read(apiClientProvider));
+});
+
+final ocrServiceProvider = Provider<OcrService>((ref) {
+  return OcrService(ref.read(apiClientProvider));
 });
