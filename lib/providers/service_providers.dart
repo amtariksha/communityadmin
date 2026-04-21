@@ -10,6 +10,10 @@ import 'package:community_admin/services/ticket_service.dart';
 import 'package:community_admin/services/announcement_service.dart';
 import 'package:community_admin/services/staff_service.dart';
 import 'package:community_admin/services/approval_service.dart';
+import 'package:community_admin/services/amenity_service.dart';
+import 'package:community_admin/services/voting_service.dart';
+import 'package:community_admin/services/document_service.dart';
+import 'package:community_admin/services/utility_service.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
@@ -51,4 +55,20 @@ final staffServiceProvider = Provider<StaffService>((ref) {
 
 final approvalServiceProvider = Provider<ApprovalService>((ref) {
   return ApprovalService(ref.read(apiClientProvider));
+});
+
+final amenityServiceProvider = Provider<AmenityService>((ref) {
+  return AmenityService(ref.read(apiClientProvider));
+});
+
+final votingServiceProvider = Provider<VotingService>((ref) {
+  return VotingService(ref.read(apiClientProvider));
+});
+
+final documentServiceProvider = Provider<DocumentService>((ref) {
+  return DocumentService(ref.read(apiClientProvider));
+});
+
+final utilityServiceProvider = Provider<UtilityService>((ref) {
+  return UtilityService(ref.read(apiClientProvider));
 });

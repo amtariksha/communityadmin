@@ -83,6 +83,26 @@ class MoreScreen extends ConsumerWidget {
             onTap: () => context.go('/approvals'),
           ),
           _MenuItem(
+            icon: Icons.event_available,
+            title: 'Amenities',
+            onTap: () => context.go('/amenities'),
+          ),
+          _MenuItem(
+            icon: Icons.how_to_vote,
+            title: 'Polls',
+            onTap: () => context.go('/polls'),
+          ),
+          _MenuItem(
+            icon: Icons.folder_outlined,
+            title: 'Documents',
+            onTap: () => context.go('/documents'),
+          ),
+          _MenuItem(
+            icon: Icons.speed,
+            title: 'Utility',
+            onTap: () => context.go('/utility'),
+          ),
+          _MenuItem(
             icon: Icons.assessment,
             title: 'Reports',
             onTap: () => _showComingSoon(context),
@@ -90,7 +110,7 @@ class MoreScreen extends ConsumerWidget {
           _MenuItem(
             icon: Icons.settings,
             title: 'Settings',
-            onTap: () => _showComingSoon(context),
+            onTap: () => context.go('/settings'),
           ),
           _MenuItem(
             icon: Icons.info_outline,

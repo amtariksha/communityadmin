@@ -21,6 +21,14 @@ import 'package:community_admin/screens/staff/staff_list_screen.dart';
 import 'package:community_admin/screens/staff/leave_approvals_screen.dart';
 import 'package:community_admin/screens/staff/shifts_admin_screen.dart';
 import 'package:community_admin/screens/approvals/approvals_admin_screen.dart';
+import 'package:community_admin/screens/amenities/amenity_list_screen.dart';
+import 'package:community_admin/screens/amenities/booking_queue_screen.dart';
+import 'package:community_admin/screens/voting/polls_admin_screen.dart';
+import 'package:community_admin/screens/voting/poll_detail_screen.dart';
+import 'package:community_admin/screens/documents/documents_admin_screen.dart';
+import 'package:community_admin/screens/utility/meters_admin_screen.dart';
+import 'package:community_admin/screens/utility/record_reading_screen.dart';
+import 'package:community_admin/screens/settings/settings_screen.dart';
 import 'package:community_admin/widgets/app_shell.dart';
 
 /// Listenable that only notifies when isAuthenticated changes
@@ -155,6 +163,43 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/approvals',
             builder: (context, state) => const ApprovalsAdminScreen(),
+          ),
+          GoRoute(
+            path: '/amenities',
+            builder: (context, state) => const AmenityListScreen(),
+          ),
+          GoRoute(
+            path: '/amenities/bookings',
+            builder: (context, state) => const BookingQueueScreen(),
+          ),
+          GoRoute(
+            path: '/polls',
+            builder: (context, state) => const PollsAdminScreen(),
+          ),
+          GoRoute(
+            path: '/polls/:id',
+            builder: (context, state) => PollDetailScreen(
+              pollId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: '/documents',
+            builder: (context, state) => const DocumentsAdminScreen(),
+          ),
+          GoRoute(
+            path: '/utility',
+            builder: (context, state) => const MetersAdminScreen(),
+          ),
+          GoRoute(
+            path: '/utility/reading',
+            builder: (context, state) => RecordReadingScreen(
+              meterId: state.uri.queryParameters['meter_id']!,
+              meterType: state.uri.queryParameters['type'] ?? 'water',
+            ),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsScreen(),
           ),
         ],
       ),
