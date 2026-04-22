@@ -1,6 +1,9 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    // Firebase services plugin — reads google-services.json at build time
+    // so FirebaseApp.initializeApp() can pick up config at runtime.
+    id("com.google.gms.google-services")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -20,10 +23,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.amtariksha.community_admin"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // Matches the Firebase Android client in google-services.json
+        // (project: communityos-9a54d).
+        applicationId = "com.eassylife.admin"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

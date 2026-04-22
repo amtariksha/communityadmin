@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "287031083059",
+    "project_id": "communityos-9a54d",
+    "storage_bucket": "communityos-9a54d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287031083059:android:80260f0a88d3fc3ac2e346",
+        "android_client_info": {
+          "package_name": "com.eassylife"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCekh3dvqv8yj5_a48_HuQ_YzWnJSLTa5o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287031083059:android:d8ff14171cb8951ec2e346",
+        "android_client_info": {
+          "package_name": "com.eassylife.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCekh3dvqv8yj5_a48_HuQ_YzWnJSLTa5o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287031083059:android:242ee1a4f42dac67c2e346",
+        "android_client_info": {
+          "package_name": "com.eassylife.guard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCekh3dvqv8yj5_a48_HuQ_YzWnJSLTa5o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
