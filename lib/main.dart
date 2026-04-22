@@ -1,13 +1,16 @@
+import 'package:community_admin/config/constants.dart';
 import 'package:community_admin/config/router.dart';
 import 'package:community_admin/config/theme.dart';
 import 'package:community_admin/providers/auth_provider.dart';
 import 'package:community_admin/providers/service_providers.dart';
+import 'package:community_admin/services/api_client.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
@@ -28,8 +31,26 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.dark,
   ));
 
-  // Firebase (project communityos-9a54d). Configs live in
-  // android/app/google-services.json and ios/Runner/GoogleService-Info.plist.
+  // Bootstrap auth headers BEFORE any Riverpod provider fires an API
+  // call. Closes tester item #170 ("cannot log in at all"): the prior
+  // ApiClient read storage on every request AND called
+  // _storage.deleteAll() on any 401, silently wiping credentials.
+  const storage = FlutterSecureStorage();
+  String? bootToken;
+  String? bootTenantId;
+  try {
+    bootToken = await storage.read(key: AppConstants.tokenKey);
+    bootTenantId = await storage.read(key: AppConstants.tenantKey);
+  } catch (_) {
+    // Keystore occasionally locked at cold-boot time — fall through
+    // with nulls and the user will see /login.
+  }
+
+  final apiClient = ApiClient();
+  if (bootToken != null) {
+    apiClient.setCredentials(bootToken, bootTenantId);
+  }
+
   try {
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
@@ -37,7 +58,12 @@ Future<void> main() async {
     if (kDebugMode) debugPrint('[firebase] init failed: $e\n$st');
   }
 
-  runApp(const ProviderScope(child: CommunityAdminApp()));
+  runApp(ProviderScope(
+    overrides: [
+      apiClientProvider.overrideWithValue(apiClient),
+    ],
+    child: const CommunityAdminApp(),
+  ));
 }
 
 class CommunityAdminApp extends ConsumerStatefulWidget {
@@ -52,6 +78,18 @@ class _CommunityAdminAppState extends ConsumerState<CommunityAdminApp> {
   @override
   void initState() {
     super.initState();
+
+    // Register the 401 handler. Guards against clearing state when the
+    // user isn't authenticated (public OTP endpoints hit the same code
+    // path if the backend returns 401 for an unregistered number).
+    final apiClient = ref.read(apiClientProvider);
+    apiClient.onUnauthorized = () {
+      final auth = ref.read(authStateProvider);
+      if (auth.isAuthenticated) {
+        ref.read(authStateProvider.notifier).logout();
+      }
+    };
+
     _bootstrapPush();
 
     ref.listenManual<AuthState>(authStateProvider, (prev, next) async {

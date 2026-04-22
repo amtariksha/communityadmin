@@ -54,15 +54,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       if (token != null && userJson != null) {
         final user = User.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
+
+        // main() pre-seeds credentials; re-assert here so the notifier
+        // and ApiClient never disagree after a hot reload.
+        _ref.read(apiClientProvider).setCredentials(token, tenantId);
+
         state = AuthState(
           isAuthenticated: true,
           user: user,
           selectedTenantId: tenantId,
         );
       } else {
+        _ref.read(apiClientProvider).clearCredentials();
         state = const AuthState();
       }
     } catch (e) {
+      _ref.read(apiClientProvider).clearCredentials();
       state = const AuthState();
     }
   }
@@ -111,6 +118,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _storage.write(key: AppConstants.tenantKey, value: tenantId);
       }
 
+      // Seed the in-memory credentials on ApiClient BEFORE flipping
+      // state. Router will redirect to dashboard and dashboard
+      // providers will immediately fire API calls — they need the
+      // Authorization header present on the very first request.
+      _ref.read(apiClientProvider).setCredentials(token, tenantId);
+
       state = AuthState(
         isAuthenticated: true,
         user: user,
@@ -128,10 +141,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> selectSociety(String tenantId) async {
     await _storage.write(key: AppConstants.tenantKey, value: tenantId);
+    _ref.read(apiClientProvider).updateTenantId(tenantId);
     state = state.copyWith(selectedTenantId: tenantId);
   }
 
   Future<void> logout() async {
+    _ref.read(apiClientProvider).clearCredentials();
     await _storage.deleteAll();
     state = const AuthState();
   }
