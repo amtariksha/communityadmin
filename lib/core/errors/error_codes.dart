@@ -59,6 +59,15 @@ const Map<String, ErrorCodeDef> kErrorCodes = {
   ),
 
   // Invoicing
+  'invoice_already_cancelled': ErrorCodeDef(
+    status: 400,
+    userMessage: 'This invoice has already been cancelled.',
+  ),
+  'invoice_has_payments': ErrorCodeDef(
+    status: 400,
+    userMessage:
+        'Cannot cancel an invoice with payments. Create a credit note instead.',
+  ),
   'invoice_already_posted': ErrorCodeDef(
     status: 409,
     userMessage:
@@ -81,9 +90,27 @@ const Map<String, ErrorCodeDef> kErrorCodes = {
     userMessage:
         'The payment could not be verified. If money was deducted, it will be refunded within 5–7 working days.',
   ),
+  'payment_webhook_signature_invalid': ErrorCodeDef(
+    status: 400,
+    userMessage: 'The payment gateway signature could not be verified.',
+  ),
   'payment_already_refunded': ErrorCodeDef(
     status: 409,
     userMessage: 'This payment has already been refunded.',
+  ),
+
+  // Autopay subscriptions
+  'subscription_not_active': ErrorCodeDef(
+    status: 400,
+    userMessage: 'Only active subscriptions can be paused.',
+  ),
+  'subscription_not_paused': ErrorCodeDef(
+    status: 400,
+    userMessage: 'Only paused subscriptions can be resumed.',
+  ),
+  'subscription_already_terminated': ErrorCodeDef(
+    status: 400,
+    userMessage: 'This subscription has already been cancelled.',
   ),
 
   // RBAC / permissions
