@@ -18,7 +18,21 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // Back-button contract (QA #137):
+    //   - Pushed detail screens → normal pop (they sit above this shell).
+    //   - Non-dashboard tab → back navigates to Dashboard.
+    //   - Dashboard tab → back is swallowed (app stays open; OS Home
+    //     minimises).
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final location = GoRouterState.of(context).matchedLocation;
+        if (location != '/') {
+          context.go('/');
+        }
+      },
+      child: Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex(context),
@@ -69,6 +83,7 @@ class AppShell extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
