@@ -1,44 +1,69 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:community_admin/config/constants.dart';
+import 'package:community_admin/services/auth_token_store.dart';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-/// Single-instance HTTP client for the admin app.
+/// Single-instance HTTP client for the admin-mobile app.
 ///
-/// Matches the resident and guard apps: Authorization / tenant
-/// headers are attached synchronously from in-memory state set by
-/// [setCredentials]. The previous implementation read secure storage
-/// on every request AND called `_storage.deleteAll()` on ANY 401,
-/// which silently logged the admin out whenever the backend hiccuped
-/// — explaining tester item #170 "cannot log in at all".
+/// QA #57 cookie-auth migration — mirrors the resident + guard apps.
+/// The refresh token lives in an httpOnly cookie persisted by
+/// `PersistCookieJar`; the 15-minute access token lives only in
+/// [AuthTokenStore]. On 401 from a protected endpoint the auth
+/// interceptor calls `/auth/refresh` with an empty body, stores the
+/// new access token, and retries the original request once.
+///
+/// Must call [init] from `main()` before `runApp` so the cookie jar
+/// has rehydrated from disk by the time the first provider fires.
 class ApiClient {
   late final Dio _dio;
-  String? _token;
+  late final PersistCookieJar _cookieJar;
+  bool _initialised = false;
+
   String? _tenantId;
 
-  /// Invoked when a request comes back with 401. The root widget
-  /// registers a handler that logs the user out and routes to /login.
+  /// Invoked when both access-token refresh AND the cookie have been
+  /// rejected.
   void Function()? onUnauthorized;
 
-  bool get hasCredentials => _token != null;
+  void Function(String newAccessToken)? onRefreshed;
 
-  /// Called by AuthNotifier on login, session restore, and main()
-  /// bootstrap. Idempotent.
-  void setCredentials(String? token, String? tenantId) {
-    _token = token;
-    _tenantId = tenantId;
-  }
+  Future<bool>? _pendingRefresh;
+
+  bool get hasCredentials => AuthTokenStore.instance.accessToken != null;
+
+  PersistCookieJar get cookieJar => _cookieJar;
 
   void updateTenantId(String? tenantId) {
     _tenantId = tenantId;
   }
 
+  /// Back-compat shim — `token` forwards to [AuthTokenStore].
+  void setCredentials(String? token, String? tenantId) {
+    if (token != null && token.isNotEmpty) {
+      AuthTokenStore.instance.setAccessToken(token);
+    } else {
+      AuthTokenStore.instance.clear();
+    }
+    _tenantId = tenantId;
+  }
+
   void clearCredentials() {
-    _token = null;
+    AuthTokenStore.instance.clear();
     _tenantId = null;
   }
 
-  ApiClient() {
+  Future<void> init() async {
+    if (_initialised) return;
+    final appDocDir = await getApplicationDocumentsDirectory();
+    _cookieJar = PersistCookieJar(
+      ignoreExpires: false,
+      storage: FileStorage('${appDocDir.path}/.communityos_cookies'),
+    );
+
     _dio = Dio(BaseOptions(
       baseUrl: AppConstants.baseUrl,
       connectTimeout: const Duration(seconds: 15),
@@ -46,22 +71,40 @@ class ApiClient {
       headers: {'Content-Type': 'application/json'},
     ));
 
+    _dio.interceptors.add(CookieManager(_cookieJar));
+
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        // Synchronous in-memory read — no race conditions, no storage delays.
-        if (_token != null) {
-          options.headers['Authorization'] = 'Bearer $_token';
+        final token = AuthTokenStore.instance.accessToken;
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
         }
         if (_tenantId != null) {
           options.headers['x-tenant-id'] = _tenantId!;
         }
         handler.next(options);
       },
-      onError: (error, handler) {
-        // Auto-logout on 401 via callback. Do NOT wipe storage here —
-        // the callback guards against clearing state when the user
-        // isn't yet authenticated (public OTP endpoints).
-        if (error.response?.statusCode == 401) {
+      onError: (error, handler) async {
+        final path = error.requestOptions.path;
+        final isAuthPath = path.contains('/auth/');
+        final alreadyRetried = error.requestOptions.extra['__refreshed'] == true;
+
+        if (error.response?.statusCode == 401 &&
+            !isAuthPath &&
+            !alreadyRetried) {
+          final refreshed = await _refreshWithCookie();
+          if (refreshed) {
+            final retryOptions = error.requestOptions
+              ..extra['__refreshed'] = true
+              ..headers['Authorization'] =
+                  'Bearer ${AuthTokenStore.instance.accessToken ?? ''}';
+            try {
+              final retry = await _dio.fetch<dynamic>(retryOptions);
+              return handler.resolve(retry);
+            } catch (_) {
+              // fall through
+            }
+          }
           onUnauthorized?.call();
         }
         handler.next(error);
@@ -81,7 +124,38 @@ class ApiClient {
         ),
       );
     }
+
+    _initialised = true;
   }
+
+  Future<bool> _refreshWithCookie() {
+    final existing = _pendingRefresh;
+    if (existing != null) return existing;
+    final future = _doRefresh();
+    _pendingRefresh = future;
+    future.whenComplete(() => _pendingRefresh = null);
+    return future;
+  }
+
+  Future<bool> _doRefresh() async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/auth/refresh',
+        data: <String, dynamic>{},
+      );
+      final body = res.data;
+      if (body == null) return false;
+      final newToken = body['access_token'] as String?;
+      if (newToken == null || newToken.isEmpty) return false;
+      AuthTokenStore.instance.setAccessToken(newToken);
+      onRefreshed?.call(newToken);
+      return true;
+    } on DioException {
+      return false;
+    }
+  }
+
+  Future<bool> refresh() => _refreshWithCookie();
 
   Future<Response<T>> get<T>(
     String path, {

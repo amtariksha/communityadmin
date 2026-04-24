@@ -31,24 +31,24 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.dark,
   ));
 
-  // Bootstrap auth headers BEFORE any Riverpod provider fires an API
-  // call. Closes tester item #170 ("cannot log in at all"): the prior
-  // ApiClient read storage on every request AND called
-  // _storage.deleteAll() on any 401, silently wiping credentials.
+  // QA #57 — cookie-based refresh-token migration. Access token no
+  // longer lives on disk; `communityos_refresh` cookie in
+  // `PersistCookieJar` rehydrates the session via `POST /auth/refresh`
+  // on launch. Awaiting `apiClient.init()` loads the jar and wires
+  // the Dio interceptors before any provider fires a request.
   const storage = FlutterSecureStorage();
-  String? bootToken;
   String? bootTenantId;
   try {
-    bootToken = await storage.read(key: AppConstants.tokenKey);
     bootTenantId = await storage.read(key: AppConstants.tenantKey);
   } catch (_) {
-    // Keystore occasionally locked at cold-boot time — fall through
+    // Keystore occasionally locked at cold-boot time; fall through
     // with nulls and the user will see /login.
   }
 
   final apiClient = ApiClient();
-  if (bootToken != null) {
-    apiClient.setCredentials(bootToken, bootTenantId);
+  await apiClient.init();
+  if (bootTenantId != null) {
+    apiClient.updateTenantId(bootTenantId);
   }
 
   try {

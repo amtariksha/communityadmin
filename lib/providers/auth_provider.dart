@@ -48,26 +48,35 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _loadSavedAuth() async {
     state = state.copyWith(isLoading: true);
     try {
-      final token = await _storage.read(key: AppConstants.tokenKey);
+      // QA #57 — access token no longer on disk. Read only user +
+      // tenant, then exchange the refresh cookie for a new access
+      // token via `AuthService.refresh()`.
       final userJson = await _storage.read(key: AppConstants.userKey);
       final tenantId = await _storage.read(key: AppConstants.tenantKey);
 
-      if (token != null && userJson != null) {
-        final user = User.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
-
-        // main() pre-seeds credentials; re-assert here so the notifier
-        // and ApiClient never disagree after a hot reload.
-        _ref.read(apiClientProvider).setCredentials(token, tenantId);
-
-        state = AuthState(
-          isAuthenticated: true,
-          user: user,
-          selectedTenantId: tenantId,
-        );
-      } else {
+      if (userJson == null) {
         _ref.read(apiClientProvider).clearCredentials();
         state = const AuthState();
+        return;
       }
+
+      final user = User.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
+      _ref.read(apiClientProvider).updateTenantId(tenantId);
+
+      final refreshed =
+          await _ref.read(authServiceProvider).refresh();
+      if (!refreshed) {
+        await _storage.delete(key: AppConstants.userKey);
+        _ref.read(apiClientProvider).clearCredentials();
+        state = const AuthState();
+        return;
+      }
+
+      state = AuthState(
+        isAuthenticated: true,
+        user: user,
+        selectedTenantId: tenantId,
+      );
     } catch (e) {
       _ref.read(apiClientProvider).clearCredentials();
       state = const AuthState();
@@ -105,7 +114,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       final user = User.fromJson(userData);
 
-      await _storage.write(key: AppConstants.tokenKey, value: token);
+      // QA #57 — access token lives only in AuthTokenStore (populated
+      // in AuthService.verifyOtp above). We keep user + tenant on
+      // disk for UI restoration across launches.
       await _storage.write(
         key: AppConstants.userKey,
         value: jsonEncode(user.toJson()),
@@ -118,11 +129,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _storage.write(key: AppConstants.tenantKey, value: tenantId);
       }
 
-      // Seed the in-memory credentials on ApiClient BEFORE flipping
-      // state. Router will redirect to dashboard and dashboard
-      // providers will immediately fire API calls — they need the
-      // Authorization header present on the very first request.
-      _ref.read(apiClientProvider).setCredentials(token, tenantId);
+      _ref.read(apiClientProvider).updateTenantId(tenantId);
 
       state = AuthState(
         isAuthenticated: true,
@@ -146,6 +153,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    // QA #57 — server-side + client-side logout. Hit /auth/logout so
+    // the server drops the httpOnly refresh cookie; AuthService
+    // wipes the cookie jar on disk. Then clear in-memory access
+    // token + secure-storage user/tenant cache.
+    try {
+      await _ref.read(authServiceProvider).logout();
+    } catch (_) {
+      // Best-effort; local wipe still runs.
+    }
     _ref.read(apiClientProvider).clearCredentials();
     await _storage.deleteAll();
     state = const AuthState();
