@@ -61,7 +61,7 @@ class ApiClient {
     final appDocDir = await getApplicationDocumentsDirectory();
     _cookieJar = PersistCookieJar(
       ignoreExpires: false,
-      storage: FileStorage('${appDocDir.path}/.communityos_cookies'),
+      storage: FileStorage('${appDocDir.path}/.ezegate_admin_cookies'),
     );
 
     _dio = Dio(BaseOptions(

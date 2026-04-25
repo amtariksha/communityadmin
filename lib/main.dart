@@ -126,7 +126,7 @@ class _CommunityAdminAppState extends ConsumerState<CommunityAdminApp> {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'CommunityOS Admin',
+      title: 'ezegate Admin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
