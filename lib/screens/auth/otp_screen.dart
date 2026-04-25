@@ -78,30 +78,34 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               ),
               const SizedBox(height: 40),
 
-              PinCodeTextField(
-                appContext: context,
-                length: 6,
-                onChanged: (value) => _otp = value,
-                onCompleted: (value) {
-                  _otp = value;
-                  _verifyOtp();
-                },
-                keyboardType: TextInputType.number,
-                animationType: AnimationType.fade,
-                pinTheme: PinTheme(
-                  shape: PinCodeFieldShape.box,
-                  borderRadius: BorderRadius.circular(12),
-                  fieldHeight: 52,
-                  fieldWidth: 48,
-                  activeFillColor: Colors.grey.shade50,
-                  inactiveFillColor: Colors.grey.shade50,
-                  selectedFillColor: Colors.white,
-                  activeColor: AppTheme.primaryColor,
-                  inactiveColor: Colors.grey.shade300,
-                  selectedColor: AppTheme.primaryColor,
+              // QA #143 — OTP autofill. See note in
+              // resident otp_screen.dart for the why.
+              AutofillGroup(
+                child: PinCodeTextField(
+                  appContext: context,
+                  length: 6,
+                  onChanged: (value) => _otp = value,
+                  onCompleted: (value) {
+                    _otp = value;
+                    _verifyOtp();
+                  },
+                  keyboardType: TextInputType.number,
+                  animationType: AnimationType.fade,
+                  pinTheme: PinTheme(
+                    shape: PinCodeFieldShape.box,
+                    borderRadius: BorderRadius.circular(12),
+                    fieldHeight: 52,
+                    fieldWidth: 48,
+                    activeFillColor: Colors.grey.shade50,
+                    inactiveFillColor: Colors.grey.shade50,
+                    selectedFillColor: Colors.white,
+                    activeColor: AppTheme.primaryColor,
+                    inactiveColor: Colors.grey.shade300,
+                    selectedColor: AppTheme.primaryColor,
+                  ),
+                  enableActiveFill: true,
+                  autoFocus: true,
                 ),
-                enableActiveFill: true,
-                autoFocus: true,
               ),
               const SizedBox(height: 8),
 
