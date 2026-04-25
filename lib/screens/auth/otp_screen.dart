@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:community_admin/config/theme.dart';
 import 'package:community_admin/providers/auth_provider.dart';
+import 'package:smart_auth/smart_auth.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   final String phone;
@@ -16,6 +20,58 @@ class OtpScreen extends ConsumerStatefulWidget {
 
 class _OtpScreenState extends ConsumerState<OtpScreen> {
   String _otp = '';
+
+  /// Drives the PinCodeTextField so the SMS-consent listener can
+  /// stamp the OTP into the boxes after the user taps "Allow".
+  final TextEditingController _pinController = TextEditingController();
+
+  /// Android SMS User Consent listener. iOS gets autofill via the
+  /// AutofillGroup + AutofillHints.oneTimeCode wiring already.
+  final SmartAuth _smartAuth = SmartAuth.instance;
+  bool _consentListenerActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startSmsConsentListener();
+  }
+
+  @override
+  void dispose() {
+    _stopSmsConsentListener();
+    _pinController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _startSmsConsentListener() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    if (_consentListenerActive) return;
+    _consentListenerActive = true;
+    try {
+      final result = await _smartAuth.getSmsWithUserConsentApi();
+      if (!mounted) return;
+      _consentListenerActive = false;
+      final code = result.data?.code;
+      if (code != null && code.length == 6) {
+        _pinController.text = code;
+        _otp = code;
+        _verifyOtp();
+      }
+    } catch (e) {
+      _consentListenerActive = false;
+      if (kDebugMode) debugPrint('[otp] consent listener: $e');
+    }
+  }
+
+  Future<void> _stopSmsConsentListener() async {
+    if (!_consentListenerActive) return;
+    try {
+      await _smartAuth.removeUserConsentApiListener();
+    } catch (_) {
+      // best-effort cleanup
+    }
+    _consentListenerActive = false;
+  }
 
   Future<void> _verifyOtp() async {
     if (_otp.length != 6) return;
@@ -31,6 +87,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       } else {
         context.go('/');
       }
+    } else if (mounted) {
+      _startSmsConsentListener();
     }
   }
 
@@ -84,6 +142,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 child: PinCodeTextField(
                   appContext: context,
                   length: 6,
+                  controller: _pinController,
                   onChanged: (value) => _otp = value,
                   onCompleted: (value) {
                     _otp = value;
