@@ -39,6 +39,10 @@ class ApiClient {
 
   void updateTenantId(String? tenantId) {
     _tenantId = tenantId;
+    // Mirror to secure storage so the FCM background isolate can
+    // attach `x-tenant-id` to silent action POSTs without reaching
+    // into the live ApiClient instance.
+    AuthTokenStore.instance.persistTenantForBackgroundIsolate(tenantId);
   }
 
   /// Back-compat shim — `token` forwards to [AuthTokenStore].
@@ -49,11 +53,13 @@ class ApiClient {
       AuthTokenStore.instance.clear();
     }
     _tenantId = tenantId;
+    AuthTokenStore.instance.persistTenantForBackgroundIsolate(tenantId);
   }
 
   void clearCredentials() {
     AuthTokenStore.instance.clear();
     _tenantId = null;
+    AuthTokenStore.instance.persistTenantForBackgroundIsolate(null);
   }
 
   Future<void> init() async {
