@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
@@ -43,6 +44,15 @@ Future<void> main() async {
   } catch (_) {
     // Keystore occasionally locked at cold-boot time; fall through
     // with nulls and the user will see /login.
+  }
+
+  // Hive init for offline notification cache. Single box opens
+  // lazily inside NotificationService; init here primes the document
+  // directory so the first lookup is fast.
+  try {
+    await Hive.initFlutter();
+  } catch (e, st) {
+    if (kDebugMode) debugPrint('[hive] init failed: $e\n$st');
   }
 
   final apiClient = ApiClient();

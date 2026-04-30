@@ -17,6 +17,7 @@ import 'package:community_admin/services/utility_service.dart';
 import 'package:community_admin/services/upload_service.dart';
 import 'package:community_admin/services/ocr_service.dart';
 import 'package:community_admin/services/push_service.dart';
+import 'package:community_admin/services/notification_service.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
@@ -86,4 +87,8 @@ final ocrServiceProvider = Provider<OcrService>((ref) {
 
 final pushServiceProvider = Provider<PushService>((ref) {
   return PushService(ref.read(apiClientProvider));
+});
+
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationService(ref.read(apiClientProvider));
 });

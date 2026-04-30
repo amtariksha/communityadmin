@@ -56,6 +56,18 @@ dependencies:
   # Firebase Cloud Messaging (project: communityos-9a54d)
   firebase_core: ^3.8.0
   firebase_messaging: ^15.1.5
+  # Notification UX plan (notifications-flutter-admin.md):
+  # - flutter_local_notifications: render FCM data-only payloads with category-aware action buttons
+  # - local_auth: biometric prompt for destructive actions (reject / decline)
+  # - hive / hive_flutter: offline cache for notification inbox
+  # - uuid: idempotency-key generator on action POSTs
+  # - url_launcher: monthly_report Download buttons in inbox rows
+  flutter_local_notifications: ^18.0.1
+  local_auth: ^2.3.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  uuid: ^4.5.1
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
