@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:community_admin/config/theme.dart';
 import 'package:community_admin/providers/auth_provider.dart';
 
@@ -52,6 +53,18 @@ class SettingsScreen extends ConsumerWidget {
                   if (user?.email != null) _Kv('Email', user!.email!),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.notifications_outlined,
+                  color: AppTheme.primaryColor),
+              title: const Text('Notification preferences'),
+              subtitle: const Text(
+                  'Mute categories, quiet hours, push & email toggles'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings/notifications'),
             ),
           ),
           const SizedBox(height: 12),
