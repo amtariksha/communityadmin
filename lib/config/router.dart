@@ -30,6 +30,7 @@ import 'package:community_admin/screens/utility/meters_admin_screen.dart';
 import 'package:community_admin/screens/utility/record_reading_screen.dart';
 import 'package:community_admin/screens/settings/settings_screen.dart';
 import 'package:community_admin/screens/ocr/invoice_scan_screen.dart';
+import 'package:community_admin/screens/notifications/notification_inbox_screen.dart';
 import 'package:community_admin/widgets/app_shell.dart';
 
 /// Listenable that only notifies when isAuthenticated changes
@@ -205,6 +206,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/scan-invoice',
             builder: (context, state) => const InvoiceScanScreen(),
+          ),
+          GoRoute(
+            path: '/notifications',
+            builder: (context, state) => const NotificationInboxScreen(),
           ),
         ],
       ),
