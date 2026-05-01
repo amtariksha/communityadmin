@@ -1,3 +1,5 @@
+import 'package:community_admin/core/roles.dart';
+import 'package:community_admin/models/user.dart';
 import 'package:community_admin/services/api_client.dart';
 import 'package:community_admin/services/auth_token_store.dart';
 import 'package:dio/dio.dart';
@@ -31,6 +33,30 @@ class AuthService {
     final token = data['access_token'] as String? ?? data['token'] as String?;
     if (token != null && token.isNotEmpty) {
       AuthTokenStore.instance.setAccessToken(token);
+    }
+
+    // QA Round 14 #14-5b — apply admin-app role filter to incoming
+    // societies. If the user has zero allowlisted roles across all
+    // their societies (e.g. resident-only or guard-only account),
+    // signal `wrong_app_for_account` to the auth notifier. Defense
+    // is purely client-side until D1 #14-1e ships server-side
+    // X-App-Target filtering.
+    final userData = data['user'] as Map<String, dynamic>?;
+    if (userData != null) {
+      final raw = userData['societies'] as List<dynamic>? ?? const [];
+      final all = raw
+          .map((s) => Society.fromJson(s as Map<String, dynamic>))
+          .toList(growable: false);
+      final filtered = filterSocietiesForAdminApp(all);
+      if (all.isNotEmpty && filtered.isEmpty) {
+        data['wrong_app_for_account'] = true;
+      } else {
+        // Replace the societies list with the filtered subset so
+        // downstream User.fromJson + selectSociety only see the
+        // admin-relevant entries.
+        userData['societies'] =
+            filtered.map((s) => s.toJson()).toList(growable: false);
+      }
     }
     return data;
   }

@@ -5,6 +5,7 @@ import 'package:community_admin/providers/auth_provider.dart';
 import 'package:community_admin/screens/auth/login_screen.dart';
 import 'package:community_admin/screens/auth/otp_screen.dart';
 import 'package:community_admin/screens/auth/society_select_screen.dart';
+import 'package:community_admin/screens/auth/wrong_app_screen.dart';
 import 'package:community_admin/screens/dashboard/dashboard_screen.dart';
 import 'package:community_admin/screens/units/units_screen.dart';
 import 'package:community_admin/screens/units/unit_detail_screen.dart';
@@ -34,14 +35,19 @@ import 'package:community_admin/screens/notifications/notification_inbox_screen.
 import 'package:community_admin/screens/settings/notification_preferences_screen.dart';
 import 'package:community_admin/widgets/app_shell.dart';
 
-/// Listenable that only notifies when isAuthenticated changes
+/// Listenable that only notifies when isAuthenticated OR wrongApp
+/// changes — both flips need to re-run the redirect chain.
 class _AuthChangeNotifier extends ChangeNotifier {
   bool _wasAuthenticated = false;
+  bool _wasWrongApp = false;
 
   void update(AuthState authState) {
     final isNowAuthenticated = authState.isAuthenticated;
-    if (_wasAuthenticated != isNowAuthenticated) {
+    final isNowWrongApp = authState.wrongApp;
+    if (_wasAuthenticated != isNowAuthenticated ||
+        _wasWrongApp != isNowWrongApp) {
       _wasAuthenticated = isNowAuthenticated;
+      _wasWrongApp = isNowWrongApp;
       notifyListeners();
     }
   }
@@ -63,6 +69,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = state.matchedLocation.startsWith('/login') ||
           state.matchedLocation.startsWith('/otp') ||
           state.matchedLocation.startsWith('/select-society');
+
+      // QA Round 14 #14-5b — when the account has zero admin
+      // roles, route to /wrong-app and pin the user there until
+      // they tap Logout (which flips isAuthenticated → false and
+      // re-runs this chain back to /login).
+      if (isLoggedIn && authState.wrongApp) {
+        return state.matchedLocation == '/wrong-app' ? null : '/wrong-app';
+      }
+      // /wrong-app is auth-state-driven; reaching it without the
+      // wrongApp flag is invalid — bounce home or to login.
+      if (state.matchedLocation == '/wrong-app' && !authState.wrongApp) {
+        return isLoggedIn ? '/' : '/login';
+      }
 
       if (!isLoggedIn && !isAuthRoute) return '/login';
       if (isLoggedIn && isAuthRoute) {
@@ -92,6 +111,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/select-society',
         builder: (context, state) => const SocietySelectScreen(),
+      ),
+      GoRoute(
+        path: '/wrong-app',
+        builder: (context, state) => const WrongAppScreen(),
       ),
 
       // Main app shell with bottom nav

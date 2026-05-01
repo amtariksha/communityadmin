@@ -12,12 +12,19 @@ class AuthState {
   final String? error;
   final String? selectedTenantId;
 
+  /// Set when `verifyOtp` returns successfully but the user has zero
+  /// admin-allowlisted roles across all their societies. Drives the
+  /// `/wrong-app` redirect in `router.dart`. Transient — never
+  /// persisted; cleared on logout. (QA Round 14 #14-5b)
+  final bool wrongApp;
+
   const AuthState({
     this.isAuthenticated = false,
     this.isLoading = false,
     this.user,
     this.error,
     this.selectedTenantId,
+    this.wrongApp = false,
   });
 
   AuthState copyWith({
@@ -26,6 +33,7 @@ class AuthState {
     User? user,
     String? error,
     String? selectedTenantId,
+    bool? wrongApp,
   }) {
     return AuthState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
@@ -33,6 +41,7 @@ class AuthState {
       user: user ?? this.user,
       error: error,
       selectedTenantId: selectedTenantId ?? this.selectedTenantId,
+      wrongApp: wrongApp ?? this.wrongApp,
     );
   }
 }
@@ -104,6 +113,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final authService = _ref.read(authServiceProvider);
       final data = await authService.verifyOtp(phone, otp);
+
+      // QA Round 14 #14-5b — service signals when the account has no
+      // admin-allowlisted roles. Flip auth state to `wrongApp` so the
+      // router pushes /wrong-app. Treat this as authenticated so
+      // logout from /wrong-app cleans up correctly.
+      if (data['wrong_app_for_account'] == true) {
+        final userData = data['user'] as Map<String, dynamic>?;
+        final user = userData != null ? User.fromJson(userData) : null;
+        state = AuthState(
+          isAuthenticated: true,
+          user: user,
+          wrongApp: true,
+        );
+        return true;
+      }
 
       final token = data['token'] as String? ?? data['access_token'] as String?;
       final userData = data['user'] as Map<String, dynamic>?;
