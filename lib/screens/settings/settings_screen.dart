@@ -69,6 +69,28 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.description_outlined,
+                      color: AppTheme.primaryColor),
+                  title: const Text('Terms & Conditions'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/legal/terms'),
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                ListTile(
+                  leading: const Icon(Icons.privacy_tip_outlined,
+                      color: AppTheme.primaryColor),
+                  title: const Text('Privacy Policy'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/legal/privacy'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
             color: AppTheme.primaryColor.withValues(alpha: 0.04),
             child: const Padding(
               padding: EdgeInsets.all(16),

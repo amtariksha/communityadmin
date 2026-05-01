@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:community_admin/config/theme.dart';
 import 'package:community_admin/providers/auth_provider.dart';
+import 'package:community_admin/widgets/legal_footer.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -162,13 +163,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
 
                 const SizedBox(height: 32),
-                Text(
-                  'By continuing, you agree to our Terms of Service and Privacy Policy',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade500,
-                      ),
-                ),
+                const LegalFooter(),
               ],
             ),
           ),

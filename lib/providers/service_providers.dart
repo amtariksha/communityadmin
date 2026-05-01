@@ -18,6 +18,7 @@ import 'package:community_admin/services/upload_service.dart';
 import 'package:community_admin/services/ocr_service.dart';
 import 'package:community_admin/services/push_service.dart';
 import 'package:community_admin/services/notification_service.dart';
+import 'package:community_admin/services/cms_service.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
@@ -91,4 +92,8 @@ final pushServiceProvider = Provider<PushService>((ref) {
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(ref.read(apiClientProvider));
+});
+
+final cmsServiceProvider = Provider<CmsService>((ref) {
+  return CmsService(ref.read(apiClientProvider));
 });

@@ -6,6 +6,8 @@ import 'package:community_admin/screens/auth/login_screen.dart';
 import 'package:community_admin/screens/auth/otp_screen.dart';
 import 'package:community_admin/screens/auth/society_select_screen.dart';
 import 'package:community_admin/screens/auth/wrong_app_screen.dart';
+import 'package:community_admin/screens/legal/privacy_screen.dart';
+import 'package:community_admin/screens/legal/terms_screen.dart';
 import 'package:community_admin/screens/dashboard/dashboard_screen.dart';
 import 'package:community_admin/screens/units/units_screen.dart';
 import 'package:community_admin/screens/units/unit_detail_screen.dart';
@@ -70,6 +72,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation.startsWith('/otp') ||
           state.matchedLocation.startsWith('/select-society');
 
+      // QA Round 14 #14-5c — legal screens are accessible without
+      // auth (login footer must work pre-login). Skip all redirects.
+      if (state.matchedLocation.startsWith('/legal/')) return null;
+
       // QA Round 14 #14-5b — when the account has zero admin
       // roles, route to /wrong-app and pin the user there until
       // they tap Logout (which flips isAuthenticated → false and
@@ -115,6 +121,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/wrong-app',
         builder: (context, state) => const WrongAppScreen(),
+      ),
+      GoRoute(
+        path: '/legal/terms',
+        builder: (context, state) => const TermsScreen(),
+      ),
+      GoRoute(
+        path: '/legal/privacy',
+        builder: (context, state) => const PrivacyScreen(),
       ),
 
       // Main app shell with bottom nav

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:community_admin/config/theme.dart';
 import 'package:community_admin/providers/auth_provider.dart';
+import 'package:community_admin/widgets/legal_footer.dart';
 import 'package:smart_auth/smart_auth.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
@@ -207,6 +208,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   child: const Text('Resend OTP'),
                 ),
               ),
+              const SizedBox(height: 16),
+              const LegalFooter(),
+              const SizedBox(height: 16),
             ],
           ),
         ),
