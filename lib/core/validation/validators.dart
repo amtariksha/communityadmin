@@ -18,6 +18,13 @@ class Validators {
   // contact numbers can't slip into the database.
   static final RegExp _indianPhone = RegExp(r'^(\+91)?[6-9]\d{9}$');
 
+  // Demo / E2E account phones — recognised server-side as bypass
+  // numbers (`auth.service.ts:isDemoPhone`). Range:
+  // +910000000007..+910000000100. Allowed alongside real mobiles so
+  // the admin app can seed demo logins.
+  static final RegExp _demoIndianPhone =
+      RegExp(r'^\+910000000(00[7-9]|0[1-9]\d|100)$');
+
   // Unicode letters + basic punctuation. Rejects SQL-meta sequences
   // (apostrophe-semicolon etc.) and empty strings.
   static final RegExp _personName = RegExp(
@@ -37,7 +44,9 @@ class Validators {
   static String? indianPhone(String? input) {
     final raw = (input ?? '').trim().replaceAll(RegExp(r'[\s-]'), '');
     if (raw.isEmpty) return null;
-    if (!_indianPhone.hasMatch(raw)) {
+    final canonical = raw.startsWith('+91') ? raw : '+91$raw';
+    if (!_indianPhone.hasMatch(raw) &&
+        !_demoIndianPhone.hasMatch(canonical)) {
       return 'Enter a 10-digit Indian mobile starting 6–9 (optional +91 prefix).';
     }
     return null;
@@ -55,8 +64,13 @@ class Validators {
   /// with [indianPhone] before calling.
   static String? canonicalIndianPhone(String? input) {
     final raw = (input ?? '').trim().replaceAll(RegExp(r'[\s-]'), '');
-    if (raw.isEmpty || !_indianPhone.hasMatch(raw)) return null;
-    return raw.startsWith('+91') ? raw : '+91$raw';
+    if (raw.isEmpty) return null;
+    final canonical = raw.startsWith('+91') ? raw : '+91$raw';
+    if (!_indianPhone.hasMatch(raw) &&
+        !_demoIndianPhone.hasMatch(canonical)) {
+      return null;
+    }
+    return canonical;
   }
 
   /// Person name — min 2 chars, max 200, Unicode letters + basic punctuation.
