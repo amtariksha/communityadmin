@@ -5,6 +5,19 @@ import 'package:community_admin/main.dart' show showRootSnackBar;
 import 'package:community_admin/providers/service_providers.dart';
 import 'package:intl/intl.dart';
 
+/// Parse a backend-supplied money/quantity value defensively.
+///
+/// The accounting backend serializes monetary columns as strings
+/// (`"2520.00"`) to preserve decimal precision, but `NumberFormat.format`
+/// requires a `num`. Without this helper every row build crashed
+/// with `NoSuchMethodError: 'String' has no instance getter 'isNegative'`
+/// and the entire tab rendered blank.
+num _toNum(dynamic value) {
+  if (value == null) return 0;
+  if (value is num) return value;
+  return num.tryParse(value.toString()) ?? 0;
+}
+
 class FinanceScreen extends ConsumerStatefulWidget {
   const FinanceScreen({super.key});
 
@@ -136,7 +149,11 @@ class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
                   itemBuilder: (context, index) {
                     final inv = _invoices[index] as Map<String, dynamic>;
                     final status = (inv['status'] as String?) ?? 'draft';
-                    final amount = (inv['total_amount'] ?? inv['totalAmount'] ?? 0);
+                    // Backend returns total_amount as a String (e.g.
+                    // "11000.00"); NumberFormat.format requires a num.
+                    // Parse defensively to avoid the row-build crash
+                    // that turned a real invoice list into a blank tab.
+                    final amount = _toNum(inv['total_amount'] ?? inv['totalAmount']);
                     final unitNumber =
                         inv['unit_number'] ?? inv['unitNumber'] ?? '';
                     final invoiceNumber =
@@ -267,7 +284,7 @@ class _ReceiptsTabState extends ConsumerState<_ReceiptsTab> {
                   itemBuilder: (context, index) {
                     final receipt = _receipts[index] as Map<String, dynamic>;
                     final amount =
-                        receipt['amount'] ?? receipt['total_amount'] ?? 0;
+                        _toNum(receipt['amount'] ?? receipt['total_amount']);
                     final mode = receipt['mode'] ?? '';
                     final unitNumber =
                         receipt['unit_number'] ?? receipt['unitNumber'] ?? '';
@@ -401,7 +418,7 @@ class _DefaultersTabState extends ConsumerState<_DefaultersTab> {
         itemCount: _defaulters.length,
         itemBuilder: (context, index) {
           final inv = _defaulters[index] as Map<String, dynamic>;
-          final amount = inv['total_amount'] ?? inv['totalAmount'] ?? 0;
+          final amount = _toNum(inv['total_amount'] ?? inv['totalAmount']);
           final unitNumber = inv['unit_number'] ?? inv['unitNumber'] ?? '';
           final dueDate = inv['due_date'] ?? inv['dueDate'] ?? '';
 
