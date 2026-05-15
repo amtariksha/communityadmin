@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:community_admin/config/theme.dart';
+import 'package:community_admin/main.dart' show showRootSnackBar;
 import 'package:community_admin/providers/auth_provider.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -25,7 +26,10 @@ class MoreScreen extends ConsumerWidget {
                   radius: 28,
                   backgroundColor: AppTheme.primaryColor,
                   child: Text(
-                    (user?.name ?? 'A')[0].toUpperCase(),
+                    // QA #478 — empty `user.name` (super-admin user with
+                    // no display name) crashed with RangeError. Guard
+                    // against zero-length string before indexing.
+                    _initialFor(user?.name),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -168,9 +172,17 @@ class MoreScreen extends ConsumerWidget {
   }
 
   void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Coming soon')),
-    );
+    // QA #488 — Routing through the root ScaffoldMessenger (attached to
+    // MaterialApp.router) avoids the deactivated-widget ancestor lookup
+    // that fires when the ListTile's ink response runs after a rebuild.
+    showRootSnackBar('Coming soon');
+  }
+
+  String _initialFor(String? name) {
+    if (name == null) return 'A';
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return 'A';
+    return trimmed.substring(0, 1).toUpperCase();
   }
 }
 

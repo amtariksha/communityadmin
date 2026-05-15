@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:community_admin/config/theme.dart';
+import 'package:community_admin/main.dart' show showRootSnackBar;
 import 'package:community_admin/providers/service_providers.dart';
 import 'package:intl/intl.dart';
 
@@ -178,11 +179,7 @@ class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
           right: 16,
           bottom: 16,
           child: FloatingActionButton.extended(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Invoice generation coming soon')),
-              );
-            },
+            onPressed: () => showRootSnackBar('Invoice generation coming soon'),
             icon: const Icon(Icons.add),
             label: const Text('Generate'),
           ),
@@ -295,11 +292,7 @@ class _ReceiptsTabState extends ConsumerState<_ReceiptsTab> {
           right: 16,
           bottom: 16,
           child: FloatingActionButton.extended(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Receipt creation coming soon')),
-              );
-            },
+            onPressed: () => showRootSnackBar('Receipt creation coming soon'),
             icon: const Icon(Icons.add),
             label: const Text('Create'),
           ),

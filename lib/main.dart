@@ -119,6 +119,21 @@ class PushTapRoute {
   }
 }
 
+/// Global ScaffoldMessenger key attached to the top-level
+/// MaterialApp.router. Use [showRootSnackBar] from any widget to
+/// surface a SnackBar without doing a `ScaffoldMessenger.of(context)`
+/// lookup — the latter can hit a deactivated ancestor when a tab
+/// switches or a transient widget tears down between tap and
+/// callback (QA #484 #485 #488).
+final GlobalKey<ScaffoldMessengerState> rootMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
+void showRootSnackBar(String message) {
+  rootMessengerKey.currentState?.showSnackBar(
+    SnackBar(content: Text(message)),
+  );
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -328,6 +343,7 @@ class _CommunityAdminAppState extends ConsumerState<CommunityAdminApp> {
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
       routerConfig: router,
+      scaffoldMessengerKey: rootMessengerKey,
     );
   }
 }
