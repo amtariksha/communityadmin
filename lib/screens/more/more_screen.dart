@@ -87,6 +87,16 @@ class MoreScreen extends ConsumerWidget {
             onTap: () => context.go('/approvals'),
           ),
           _MenuItem(
+            icon: Icons.store_outlined,
+            title: 'Vendors',
+            onTap: () => context.go('/vendors'),
+          ),
+          _MenuItem(
+            icon: Icons.receipt_long_outlined,
+            title: 'Vendor Bills',
+            onTap: () => context.go('/purchases'),
+          ),
+          _MenuItem(
             icon: Icons.event_available,
             title: 'Amenities',
             onTap: () => context.go('/amenities'),

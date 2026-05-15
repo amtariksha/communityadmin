@@ -35,6 +35,12 @@ import 'package:community_admin/screens/settings/settings_screen.dart';
 import 'package:community_admin/screens/ocr/invoice_scan_screen.dart';
 import 'package:community_admin/screens/notifications/notification_inbox_screen.dart';
 import 'package:community_admin/screens/settings/notification_preferences_screen.dart';
+import 'package:community_admin/screens/vendors/vendors_screen.dart';
+import 'package:community_admin/screens/vendors/vendor_form_screen.dart';
+import 'package:community_admin/screens/vendors/vendor_detail_screen.dart';
+import 'package:community_admin/screens/purchases/purchases_screen.dart';
+import 'package:community_admin/screens/purchases/purchase_form_screen.dart';
+import 'package:community_admin/screens/purchases/purchase_detail_screen.dart';
 import 'package:community_admin/widgets/app_shell.dart';
 
 /// Listenable that only notifies when isAuthenticated OR wrongApp
@@ -251,6 +257,42 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/scan-invoice',
             builder: (context, state) => const InvoiceScanScreen(),
+          ),
+          GoRoute(
+            path: '/vendors',
+            builder: (context, state) => const VendorsScreen(),
+          ),
+          GoRoute(
+            path: '/vendors/new',
+            builder: (context, state) => const VendorFormScreen(),
+          ),
+          GoRoute(
+            path: '/vendors/:id',
+            builder: (context, state) => VendorDetailScreen(
+              vendorId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: '/vendors/:id/edit',
+            builder: (context, state) => VendorFormScreen(
+              vendorId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: '/purchases',
+            builder: (context, state) => const PurchasesScreen(),
+          ),
+          GoRoute(
+            path: '/purchases/new',
+            builder: (context, state) => PurchaseFormScreen(
+              fromScan: state.uri.queryParameters['from'] == 'scan',
+            ),
+          ),
+          GoRoute(
+            path: '/purchases/:id',
+            builder: (context, state) => PurchaseDetailScreen(
+              billId: state.pathParameters['id']!,
+            ),
           ),
           GoRoute(
             path: '/notifications',
