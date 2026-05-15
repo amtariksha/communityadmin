@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:community_admin/config/constants.dart';
 import 'package:community_admin/config/router.dart';
 import 'package:community_admin/config/theme.dart';
@@ -135,7 +136,9 @@ void showRootSnackBar(String message) {
 }
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // Keep native splash visible during bootstrap
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -188,6 +191,9 @@ Future<void> main() async {
   } catch (e, st) {
     if (kDebugMode) debugPrint('[firebase] init failed: $e\n$st');
   }
+
+  // Remove native splash — app is ready
+  FlutterNativeSplash.remove();
 
   runApp(ProviderScope(
     overrides: [
@@ -338,7 +344,7 @@ class _CommunityAdminAppState extends ConsumerState<CommunityAdminApp> {
     // Locking themeMode prevents OS dark-mode autodetect from
     // rendering an unstyled night version.
     return MaterialApp.router(
-      title: 'ezegate Admin',
+      title: 'Ezegate Admin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,

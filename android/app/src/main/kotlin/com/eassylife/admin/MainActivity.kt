@@ -1,4 +1,4 @@
-package com.amtariksha.community_admin
+package com.eassylife.admin
 
 import io.flutter.embedding.android.FlutterActivity
 

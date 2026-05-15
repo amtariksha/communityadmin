@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 2.0.0+6
 
 environment:
   sdk: ^3.9.2
@@ -70,6 +70,8 @@ dependencies:
   url_launcher: ^6.3.1
   # QA Round 14 #14-5c — render CMS-backed Terms / Privacy markdown.
   flutter_markdown: ^0.7.4+1
+  # Native splash screen (preserve/remove API used in main.dart)
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +83,38 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  # App icon generation
+  flutter_launcher_icons: ^0.14.3
+
+# ── App Icon Configuration ──────────────────────────────────────────────
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/assets/logo.png"
+  min_sdk_android: 21
+  # Remove the alpha channel to avoid the Google Play Store warning
+  remove_alpha_ios: true
+  # Web favicon
+  web:
+    generate: true
+    image_path: "assets/assets/logo.png"
+    background_color: "#F5A623"
+    theme_color: "#F5A623"
+
+# ── Native Splash Screen Configuration ──────────────────────────────────
+flutter_native_splash:
+  color: "#F5A623"
+  image: "assets/assets/logo.png"
+  color_dark: "#F5A623"
+  image_dark: "assets/assets/logo.png"
+  android_12:
+    color: "#F5A623"
+    image: "assets/assets/logo.png"
+    color_dark: "#F5A623"
+    image_dark: "assets/assets/logo.png"
+  web: true
+  ios: true
+  android: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
