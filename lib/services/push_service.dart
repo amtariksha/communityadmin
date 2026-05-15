@@ -116,7 +116,9 @@ class PushService {
     await _api.post<Map<String, dynamic>>(
       '/notifications/devices',
       data: {
-        'device_token': token,
+        // Backend validator expects `token`, not `device_token` (QA #479).
+        // Resident + guard apps already use `token`; admin was the outlier.
+        'token': token,
         'platform': Platform.isIOS ? 'ios' : 'android',
         if (deviceName != null) 'device_name': deviceName,
       },
