@@ -41,6 +41,13 @@ class AuthService {
     // signal `wrong_app_for_account` to the auth notifier. Defense
     // is purely client-side until D1 #14-1e ships server-side
     // X-App-Target filtering.
+    //
+    // QA #475 #477 — additionally gate users who can't operate any
+    // tenant-scoped feature on mobile: super_admin with no admin
+    // membership in any society, or any user with no societies at
+    // all. Both end up hitting tenant-scoped APIs with no
+    // `x-tenant-id` header and getting 403. Push them to /wrong-app
+    // with a variant message instead of crashing the home screen.
     final userData = data['user'] as Map<String, dynamic>?;
     if (userData != null) {
       final raw = userData['societies'] as List<dynamic>? ?? const [];
@@ -48,8 +55,21 @@ class AuthService {
           .map((s) => Society.fromJson(s as Map<String, dynamic>))
           .toList(growable: false);
       final filtered = filterSocietiesForAdminApp(all);
-      if (all.isNotEmpty && filtered.isEmpty) {
+      final isSuperAdmin = userData['isSuperAdmin'] == true;
+
+      if (filtered.isEmpty) {
         data['wrong_app_for_account'] = true;
+        if (isSuperAdmin) {
+          // Super admin always belongs on the admin web — mobile
+          // doesn't have multi-tenant tooling.
+          data['wrong_app_reason'] = 'super_admin_use_web';
+        } else if (all.isEmpty) {
+          // Account has no societies at all.
+          data['wrong_app_reason'] = 'no_societies';
+        } else {
+          // Has societies, but none with an admin-allowlisted role.
+          data['wrong_app_reason'] = 'not_admin_role';
+        }
       } else {
         // Replace the societies list with the filtered subset so
         // downstream User.fromJson + selectSociety only see the

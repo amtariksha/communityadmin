@@ -36,6 +36,11 @@ class _WrongAppScreenState extends ConsumerState<WrongAppScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final reason = ref.watch(
+      authStateProvider.select((s) => s.wrongAppReason),
+    );
+    final copy = _copyFor(reason);
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -51,15 +56,15 @@ class _WrongAppScreenState extends ConsumerState<WrongAppScreen> {
                   color: AppTheme.errorColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppRadius.xxl),
                 ),
-                child: const Icon(
-                  Icons.no_accounts,
+                child: Icon(
+                  copy.icon,
                   size: 40,
                   color: AppTheme.errorColor,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
               Text(
-                'Wrong app for this account',
+                copy.heading,
                 style: AppTheme.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -67,8 +72,7 @@ class _WrongAppScreenState extends ConsumerState<WrongAppScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'This app is for society administrators. Please use '
-                'Eassy Resident or Eassy Guard app.',
+                copy.body,
                 style: AppTheme.inter(
                   fontSize: 14,
                   color: AppTheme.textSecondary,
@@ -100,4 +104,48 @@ class _WrongAppScreenState extends ConsumerState<WrongAppScreen> {
       ),
     );
   }
+
+  _WrongAppCopy _copyFor(String? reason) {
+    switch (reason) {
+      case 'super_admin_use_web':
+        return const _WrongAppCopy(
+          icon: Icons.desktop_windows_outlined,
+          heading: 'Use the admin web for super admin',
+          body:
+              'Super admin features (multi-society management, platform '
+              'settings, legal documents) are available on the admin '
+              'web. Open https://admin.eassy.life on a desktop browser '
+              'to continue.',
+        );
+      case 'no_societies':
+        return const _WrongAppCopy(
+          icon: Icons.apartment_outlined,
+          heading: 'No societies linked',
+          body:
+              'Your account is not linked to any society yet. Contact '
+              'your community administrator or Eassy support to be '
+              'added before signing in to the admin app.',
+        );
+      case 'not_admin_role':
+      default:
+        return const _WrongAppCopy(
+          icon: Icons.no_accounts,
+          heading: 'Wrong app for this account',
+          body:
+              'This app is for society administrators. Please use '
+              'Eassy Resident or Eassy Guard app.',
+        );
+    }
+  }
+}
+
+class _WrongAppCopy {
+  final IconData icon;
+  final String heading;
+  final String body;
+  const _WrongAppCopy({
+    required this.icon,
+    required this.heading,
+    required this.body,
+  });
 }

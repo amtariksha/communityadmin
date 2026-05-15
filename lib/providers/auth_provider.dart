@@ -18,6 +18,16 @@ class AuthState {
   /// persisted; cleared on logout. (QA Round 14 #14-5b)
   final bool wrongApp;
 
+  /// Why we routed to `/wrong-app`. Drives the message variant in
+  /// `WrongAppScreen`. Values:
+  ///   - `'not_admin_role'` — user has societies but none with an
+  ///     admin-allowlisted role (resident-only or guard-only).
+  ///   - `'super_admin_use_web'` — super admin with no admin-role
+  ///     society membership; redirect them to the admin web.
+  ///   - `'no_societies'` — user has no societies linked at all.
+  /// (QA #475 #477)
+  final String? wrongAppReason;
+
   const AuthState({
     this.isAuthenticated = false,
     this.isLoading = false,
@@ -25,6 +35,7 @@ class AuthState {
     this.error,
     this.selectedTenantId,
     this.wrongApp = false,
+    this.wrongAppReason,
   });
 
   AuthState copyWith({
@@ -34,6 +45,7 @@ class AuthState {
     String? error,
     String? selectedTenantId,
     bool? wrongApp,
+    String? wrongAppReason,
   }) {
     return AuthState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
@@ -42,6 +54,7 @@ class AuthState {
       error: error,
       selectedTenantId: selectedTenantId ?? this.selectedTenantId,
       wrongApp: wrongApp ?? this.wrongApp,
+      wrongAppReason: wrongAppReason ?? this.wrongAppReason,
     );
   }
 }
@@ -125,6 +138,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isAuthenticated: true,
           user: user,
           wrongApp: true,
+          wrongAppReason: data['wrong_app_reason'] as String?,
         );
         return true;
       }
