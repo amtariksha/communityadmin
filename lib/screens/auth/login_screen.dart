@@ -16,7 +16,10 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _sendViaWhatsApp = true;
+  // Default to SMS — SMS reliability is more predictable on Indian
+  // carriers + doesn't depend on WhatsApp being installed. User can
+  // opt-in to WhatsApp explicitly.
+  bool _sendViaWhatsApp = false;
 
   @override
   void dispose() {

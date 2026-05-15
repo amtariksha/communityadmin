@@ -65,6 +65,7 @@ class _InvoicesTab extends ConsumerStatefulWidget {
 class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
   List<dynamic> _invoices = [];
   bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -73,7 +74,10 @@ class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
   }
 
   Future<void> _load() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final data = await ref.read(invoiceServiceProvider).getInvoices();
       if (mounted) {
@@ -85,7 +89,12 @@ class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -108,6 +117,9 @@ class _InvoicesTabState extends ConsumerState<_InvoicesTab> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_error != null) {
+      return _LoadErrorView(message: _error!, onRetry: _load);
+    }
 
     return Stack(
       children: [
@@ -200,6 +212,7 @@ class _ReceiptsTab extends ConsumerStatefulWidget {
 class _ReceiptsTabState extends ConsumerState<_ReceiptsTab> {
   List<dynamic> _receipts = [];
   bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -208,7 +221,10 @@ class _ReceiptsTabState extends ConsumerState<_ReceiptsTab> {
   }
 
   Future<void> _load() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final data = await ref.read(receiptServiceProvider).getReceipts();
       if (mounted) {
@@ -220,13 +236,21 @@ class _ReceiptsTabState extends ConsumerState<_ReceiptsTab> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_error != null) {
+      return _LoadErrorView(message: _error!, onRetry: _load);
+    }
 
     return Stack(
       children: [
@@ -313,6 +337,7 @@ class _DefaultersTab extends ConsumerStatefulWidget {
 class _DefaultersTabState extends ConsumerState<_DefaultersTab> {
   List<dynamic> _defaulters = [];
   bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -321,7 +346,10 @@ class _DefaultersTabState extends ConsumerState<_DefaultersTab> {
   }
 
   Future<void> _load() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final data =
           await ref.read(invoiceServiceProvider).getInvoices(status: 'overdue');
@@ -334,13 +362,21 @@ class _DefaultersTabState extends ConsumerState<_DefaultersTab> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_error != null) {
+      return _LoadErrorView(message: _error!, onRetry: _load);
+    }
 
     if (_defaulters.isEmpty) {
       return Center(
@@ -394,6 +430,47 @@ class _DefaultersTabState extends ConsumerState<_DefaultersTab> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _LoadErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _LoadErrorView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline,
+                size: 48, color: Colors.grey.shade400),
+            const SizedBox(height: 12),
+            Text(
+              'Could not load',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+          ],
+        ),
       ),
     );
   }

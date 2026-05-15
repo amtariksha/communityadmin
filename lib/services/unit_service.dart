@@ -144,7 +144,14 @@ class UnitService {
       '/units/directory/members',
       queryParameters: params,
     );
-    return response.data!;
+    final raw = response.data ?? const <String, dynamic>{};
+    // Normalize to { items, total } so screens read a single key.
+    final items = (raw['data'] as List<dynamic>?) ??
+        (raw['items'] as List<dynamic>?) ??
+        (raw['members'] as List<dynamic>?) ??
+        const <dynamic>[];
+    final total = (raw['total'] as int?) ?? items.length;
+    return <String, dynamic>{'items': items, 'total': total};
   }
 
   Future<Map<String, dynamic>> getOccupancyReport() async {

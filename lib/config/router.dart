@@ -91,6 +91,13 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (!isLoggedIn && !isAuthRoute) return '/login';
       if (isLoggedIn && isAuthRoute) {
+        // Explicit "Switch Society" navigation from More → Switch Society
+        // must keep the user on /select-society even though they're
+        // already authenticated and have a tenant selected. Without this
+        // bypass the redirect chain bounces them to '/' immediately.
+        if (state.matchedLocation.startsWith('/select-society')) {
+          return null;
+        }
         // If authenticated but no society selected and multiple societies
         if (authState.selectedTenantId == null &&
             authState.user != null &&
