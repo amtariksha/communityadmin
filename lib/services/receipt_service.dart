@@ -13,7 +13,13 @@ class ReceiptService {
       '/receipts',
       queryParameters: {'page': page, 'limit': limit},
     );
-    return response.data!;
+    final raw = response.data ?? const <String, dynamic>{};
+    final items = (raw['data'] as List<dynamic>?) ??
+        (raw['items'] as List<dynamic>?) ??
+        (raw['receipts'] as List<dynamic>?) ??
+        const <dynamic>[];
+    final total = (raw['total'] as int?) ?? items.length;
+    return <String, dynamic>{'items': items, 'total': total};
   }
 
   Future<Map<String, dynamic>> createReceipt({

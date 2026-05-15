@@ -20,7 +20,13 @@ class GateService {
       '/gate/visitors',
       queryParameters: params,
     );
-    return response.data!;
+    final raw = response.data ?? const <String, dynamic>{};
+    final items = (raw['data'] as List<dynamic>?) ??
+        (raw['items'] as List<dynamic>?) ??
+        (raw['visitors'] as List<dynamic>?) ??
+        const <dynamic>[];
+    final total = (raw['total'] as int?) ?? items.length;
+    return <String, dynamic>{'items': items, 'total': total};
   }
 
   Future<Map<String, dynamic>> checkInVisitor(String id) async {
@@ -45,7 +51,13 @@ class GateService {
       '/gate/parcels',
       queryParameters: {'page': page, 'limit': limit},
     );
-    return response.data!;
+    final raw = response.data ?? const <String, dynamic>{};
+    final items = (raw['data'] as List<dynamic>?) ??
+        (raw['items'] as List<dynamic>?) ??
+        (raw['parcels'] as List<dynamic>?) ??
+        const <dynamic>[];
+    final total = (raw['total'] as int?) ?? items.length;
+    return <String, dynamic>{'items': items, 'total': total};
   }
 
   Future<Map<String, dynamic>> collectParcel(String id) async {

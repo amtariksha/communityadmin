@@ -20,7 +20,15 @@ class InvoiceService {
       '/invoices',
       queryParameters: params,
     );
-    return response.data!;
+    final raw = response.data ?? const <String, dynamic>{};
+    // Backend returns { data: [...], total: N }. Normalize to
+    // { items: [...], total: N } so screens read a single key.
+    final items = (raw['data'] as List<dynamic>?) ??
+        (raw['items'] as List<dynamic>?) ??
+        (raw['invoices'] as List<dynamic>?) ??
+        const <dynamic>[];
+    final total = (raw['total'] as int?) ?? items.length;
+    return <String, dynamic>{'items': items, 'total': total};
   }
 
   Future<List<dynamic>> getInvoiceRules() async {
