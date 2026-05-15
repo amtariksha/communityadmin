@@ -19,6 +19,9 @@ import 'package:community_admin/services/ocr_service.dart';
 import 'package:community_admin/services/push_service.dart';
 import 'package:community_admin/services/notification_service.dart';
 import 'package:community_admin/services/cms_service.dart';
+import 'package:community_admin/services/vendor_service.dart';
+import 'package:community_admin/services/purchase_service.dart';
+import 'package:community_admin/services/ledger_service.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
@@ -96,4 +99,16 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 
 final cmsServiceProvider = Provider<CmsService>((ref) {
   return CmsService(ref.read(apiClientProvider));
+});
+
+final vendorServiceProvider = Provider<VendorService>((ref) {
+  return VendorService(ref.read(apiClientProvider));
+});
+
+final purchaseServiceProvider = Provider<PurchaseService>((ref) {
+  return PurchaseService(ref.read(apiClientProvider));
+});
+
+final ledgerServiceProvider = Provider<LedgerService>((ref) {
+  return LedgerService(ref.read(apiClientProvider));
 });
