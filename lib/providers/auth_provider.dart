@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:community_admin/config/constants.dart';
+import 'package:community_admin/core/roles.dart';
 import 'package:community_admin/models/user.dart';
 import 'package:community_admin/providers/service_providers.dart';
 
@@ -94,9 +95,47 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return;
       }
 
+      // QA Round 14 #14-5b cold-start gate. The cached User in secure
+      // storage may pre-date the role filter (sessions persisted by
+      // older app versions). Re-apply the admin role allowlist on
+      // every cold start so a security_guard / resident-only / super
+      // admin session is correctly routed to /wrong-app instead of
+      // landing on the home screen and 403-ing on every API.
+      final filtered = filterSocietiesForAdminApp(user.societies);
+      if (filtered.isEmpty) {
+        // Pin to /wrong-app with the right variant copy.
+        state = AuthState(
+          isAuthenticated: true,
+          user: user,
+          wrongApp: true,
+          wrongAppReason: user.isSuperAdmin
+              ? 'super_admin_use_web'
+              : (user.societies.isEmpty ? 'no_societies' : 'not_admin_role'),
+        );
+        return;
+      }
+
+      // Update the cached User in secure storage to the filtered
+      // subset so future cold starts see the trimmed list directly.
+      final filteredUser = User(
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+        isSuperAdmin: user.isSuperAdmin,
+        societies: filtered,
+      );
+      if (filtered.length != user.societies.length) {
+        await _storage.write(
+          key: AppConstants.userKey,
+          value: jsonEncode(filteredUser.toJson()),
+        );
+      }
+
       state = AuthState(
         isAuthenticated: true,
-        user: user,
+        user: filteredUser,
         selectedTenantId: tenantId,
       );
     } catch (e) {
