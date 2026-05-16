@@ -59,11 +59,25 @@ class Society {
   /// is always populated.
   final List<String> roles;
 
+  /// White-label runtime branding (backend migration 099). Super-admin
+  /// set per society. `logoUrl` is shown as the society's logo in-app;
+  /// `displayName` overrides the wordmark. Both null when the society
+  /// hasn't been branded — callers fall back to `BrandConfig`.
+  final String? logoUrl;
+  final String? displayName;
+
   Society({
     required this.id,
     required this.name,
     required this.roles,
+    this.logoUrl,
+    this.displayName,
   });
+
+  /// Wordmark to show for this society — its branded name, else `name`.
+  String get brandName => displayName?.trim().isNotEmpty == true
+      ? displayName!.trim()
+      : name;
 
   /// Legacy scalar role accessor — kept for back-compat with screens
   /// that read `society.role` directly (e.g. settings, dashboard).
@@ -105,6 +119,8 @@ class Society {
       id: json['id'] as String? ?? json['tenantId'] as String? ?? '',
       name: json['name'] as String? ?? json['tenantName'] as String? ?? '',
       roles: roles,
+      logoUrl: json['logo_url'] as String?,
+      displayName: json['display_name'] as String?,
     );
   }
 
@@ -113,5 +129,7 @@ class Society {
         'name': name,
         'role': role,
         'roles': roles,
+        'logo_url': logoUrl,
+        'display_name': displayName,
       };
 }

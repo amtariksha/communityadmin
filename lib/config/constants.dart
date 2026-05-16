@@ -1,11 +1,16 @@
+import 'package:community_admin/config/brand_config.dart';
+
 class AppConstants {
-  static const String appName = 'ezegate Admin';
+  /// User-facing brand name — resolved from the active white-label
+  /// brand (`tool/apply_brand.dart`).
+  static const String appName = BrandConfig.appName;
   static const String appVersion = '1.0.0';
 
-  // API
+  // API — defaults to the brand's target backend; an explicit
+  // --dart-define=API_BASE_URL still wins for ad-hoc builds.
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://community.eassy.life',
+    defaultValue: BrandConfig.apiBaseUrl,
   );
 
   // Storage keys
