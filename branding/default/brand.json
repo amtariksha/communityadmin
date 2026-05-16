@@ -1,0 +1,15 @@
+{
+  "slug": "default",
+  "appName": "Ezgate Admin",
+  "applicationId": "com.eassylife.admin",
+  "iosBundleId": "com.eassylife.admin",
+  "apiBaseUrl": "https://community.eassy.life",
+  "colors": {
+    "primary": "FFA300",
+    "primaryVariant": "F5A623",
+    "primarySoftTint": "FFEDCC",
+    "brandSurfaceAccent": "FAEBDD",
+    "brandMutedText": "7A5828",
+    "secondary": "F5A623"
+  }
+}

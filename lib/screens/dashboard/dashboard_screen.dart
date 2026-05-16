@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:community_admin/config/theme.dart';
+import 'package:community_admin/providers/auth_provider.dart';
 import 'package:community_admin/providers/service_providers.dart';
+import 'package:community_admin/widgets/brand_logo.dart';
 import 'package:community_admin/widgets/notification_bell.dart';
 import 'package:intl/intl.dart';
 
@@ -49,9 +51,28 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Runtime per-society branding (migration 099) — the logged-in
+    // society's own logo + name as the main app identity. Falls back
+    // to the build-time brand when the society isn't branded.
+    final auth = ref.watch(authStateProvider);
+    final society = auth.user?.societies
+        .where((s) => s.id == auth.selectedTenantId)
+        .firstOrNull;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: Row(
+          children: [
+            BrandLogo(logoUrl: society?.logoUrl, size: 28),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                society?.brandName ?? 'Dashboard',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         actions: [
           const NotificationBell(),
           IconButton(
