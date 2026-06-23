@@ -1,15 +1,15 @@
 {
   "slug": "default",
-  "appName": "Ezgate Admin",
+  "appName": "Mera Ghar Admin",
   "applicationId": "com.eassylife.admin",
   "iosBundleId": "com.eassylife.admin",
-  "apiBaseUrl": "https://community.eassy.life",
+  "apiBaseUrl": "https://meraghar.amtariksha.com",
   "colors": {
-    "primary": "FFA300",
-    "primaryVariant": "F5A623",
-    "primarySoftTint": "FFEDCC",
-    "brandSurfaceAccent": "FAEBDD",
-    "brandMutedText": "7A5828",
-    "secondary": "F5A623"
+    "primary": "0F766E",
+    "primaryVariant": "14B8A6",
+    "primarySoftTint": "CCFBF1",
+    "brandSurfaceAccent": "ECFEFF",
+    "brandMutedText": "134E4A",
+    "secondary": "F59E0B"
   }
 }

@@ -19,10 +19,10 @@ class BrandConfig {
   static const String slug = 'default';
 
   /// Launcher label + in-app wordmark fallback.
-  static const String appName = 'Ezgate Admin';
+  static const String appName = 'Mera Ghar Admin';
 
   /// Backend instance this build targets.
-  static const String apiBaseUrl = 'https://community.eassy.life';
+  static const String apiBaseUrl = 'https://meraghar.amtariksha.com';
 
   /// Bundled logo — shown on splash / login and as the runtime fallback
   /// when a society has no `logo_url`.
@@ -30,10 +30,10 @@ class BrandConfig {
 
   // --- Brand palette (build-time). Status / neutral colours live in
   //     theme.dart and are not brand-variable. ---
-  static const Color primaryColor = Color(0xFFFFA300);
-  static const Color primaryColorVariant = Color(0xFFF5A623);
-  static const Color primarySoftTint = Color(0xFFFFEDCC);
-  static const Color brandSurfaceAccent = Color(0xFFFAEBDD);
-  static const Color brandMutedText = Color(0xFF7A5828);
-  static const Color secondaryColor = Color(0xFFF5A623);
+  static const Color primaryColor = Color(0xFF0F766E);
+  static const Color primaryColorVariant = Color(0xFF14B8A6);
+  static const Color primarySoftTint = Color(0xFFCCFBF1);
+  static const Color brandSurfaceAccent = Color(0xFFECFEFF);
+  static const Color brandMutedText = Color(0xFF134E4A);
+  static const Color secondaryColor = Color(0xFFF59E0B);
 }
