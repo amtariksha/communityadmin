@@ -36,7 +36,7 @@ android {
     defaultConfig {
         // Matches the Firebase Android client in google-services.json
         // (project: communityos-9a54d).
-        applicationId = "com.eassylife.admin"
+        applicationId = "com.meraghar.admin"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

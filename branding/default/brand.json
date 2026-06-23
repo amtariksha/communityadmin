@@ -1,8 +1,8 @@
 {
   "slug": "default",
   "appName": "Mera Ghar Admin",
-  "applicationId": "com.eassylife.admin",
-  "iosBundleId": "com.eassylife.admin",
+  "applicationId": "com.meraghar.admin",
+  "iosBundleId": "com.meraghar.admin",
   "apiBaseUrl": "https://meraghar.amtariksha.com",
   "colors": {
     "primary": "0F766E",
