@@ -137,7 +137,7 @@ class MoreScreen extends ConsumerWidget {
             onTap: () {
               showAboutDialog(
                 context: context,
-                applicationName: 'ezegate Admin',
+                applicationName: 'Mera Ghar Admin',
                 applicationVersion: '1.0.0',
                 applicationLegalese: 'Amtariksha Tech Pvt Ltd',
               );

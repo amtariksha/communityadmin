@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:community_admin/config/brand_config.dart';
 import 'package:community_admin/config/tokens.dart';
 
-/// ezegate brand theme — light only.
+/// Mera Ghar brand theme — light only.
 ///
 /// Tokens kept in lockstep with the resident app
 /// (`communityuser/lib/config/theme.dart`) — same Figma file, same
@@ -11,7 +11,7 @@ import 'package:community_admin/config/tokens.dart';
 /// (`primaryColor`, `secondaryColor`, `successColor`, `warningColor`,
 /// `errorColor`, `surfaceColor`) so admin screens that reference them
 /// directly keep working without edits — only the values change from
-/// indigo to ezegate orange.
+/// indigo to Mera Ghar teal.
 ///
 /// **Light only.** The Figma spec has no dark frames; the white-label
 /// brand is designed for a single bright look. `themeMode` is forced
@@ -129,7 +129,7 @@ class AppTheme {
 
   // -------------------------------------------------------------------------
   // Light theme (only theme — dark mode dropped to match resident
-  // ezegate fork; Figma has no dark frames)
+  // Mera Ghar fork; Figma has no dark frames)
   // -------------------------------------------------------------------------
 
   static ThemeData get lightTheme {

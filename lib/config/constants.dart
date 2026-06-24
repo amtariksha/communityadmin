@@ -14,9 +14,9 @@ class AppConstants {
   );
 
   // Storage keys
-  static const String tokenKey = 'ezegate_admin_token';
-  static const String tenantKey = 'ezegate_admin_tenant';
-  static const String userKey = 'ezegate_admin_user';
+  static const String tokenKey = 'meraghar_admin_token';
+  static const String tenantKey = 'meraghar_admin_tenant';
+  static const String userKey = 'meraghar_admin_user';
 
   // Pagination
   static const int defaultPageSize = 20;

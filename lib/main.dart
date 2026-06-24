@@ -340,11 +340,11 @@ class _CommunityAdminAppState extends ConsumerState<CommunityAdminApp> {
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
 
-    // ezegate brand: light theme only (Figma has no dark frames).
+    // Mera Ghar brand: light theme only (Figma has no dark frames).
     // Locking themeMode prevents OS dark-mode autodetect from
     // rendering an unstyled night version.
     return MaterialApp.router(
-      title: 'Ezegate Admin',
+      title: 'Mera Ghar Admin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,

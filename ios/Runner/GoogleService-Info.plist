@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyAV_XffPz1flxwjLdccMGqFg84C5Mfh7QI</string>
+	<string>AIzaSyDL6n9RqVbswTN2Hp7TZeOnVOnPyz1IgV8</string>
 	<key>GCM_SENDER_ID</key>
-	<string>287031083059</string>
+	<string>460876612781</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.eassylife.admin</string>
+	<string>com.meraghar.admin</string>
 	<key>PROJECT_ID</key>
-	<string>communityos-9a54d</string>
+	<string>meraghar-ff70e</string>
 	<key>STORAGE_BUCKET</key>
-	<string>communityos-9a54d.firebasestorage.app</string>
+	<string>meraghar-ff70e.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:287031083059:ios:4f82fef2e6c1bd98c2e346</string>
+	<string>1:460876612781:ios:9b2698ee7b4e727c4db224</string>
 </dict>
 </plist>

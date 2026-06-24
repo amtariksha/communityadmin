@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Design tokens for the **ezegate Admin** build — kept in lockstep
+/// Design tokens for the **Mera Ghar Admin** build — kept in lockstep
 /// with the resident app's tokens (`communityuser/lib/config/tokens.dart`).
 ///
 /// Single source of truth for spacing, radius, elevation, and shadow

@@ -77,7 +77,7 @@ class LocalNotificationsService {
           AndroidNotificationChannel(
             descriptor.id,
             _channelNameFor(descriptor.id),
-            description: 'ezegate Admin ${descriptor.id} notifications',
+            description: 'Mera Ghar Admin ${descriptor.id} notifications',
             importance: descriptor.actions.isNotEmpty
                 ? Importance.high
                 : Importance.defaultImportance,
@@ -102,7 +102,7 @@ class LocalNotificationsService {
       }
       return;
     }
-    final title = (data['title'] ?? 'ezegate Admin').toString();
+    final title = (data['title'] ?? 'Mera Ghar Admin').toString();
     final body = (data['body'] ?? '').toString();
     final categoryId = resolveCategory(data);
     final descriptor = kAdminCategories[categoryId];
@@ -130,7 +130,7 @@ class LocalNotificationsService {
     final androidDetails = AndroidNotificationDetails(
       descriptor.id,
       _channelNameFor(descriptor.id),
-      channelDescription: 'ezegate Admin ${descriptor.id} notifications',
+      channelDescription: 'Mera Ghar Admin ${descriptor.id} notifications',
       importance: descriptor.actions.isNotEmpty
           ? Importance.high
           : Importance.defaultImportance,

@@ -9,8 +9,8 @@ import 'package:community_admin/providers/auth_provider.dart';
 /// resident-only or guard-only account).
 ///
 /// QA Round 14 #14-5b — copy lifted verbatim from the round-14 plan
-/// §D5: "This app is for society administrators. Please use Eassy
-/// Resident or Eassy Guard app." The Logout button calls
+/// §D5: "This app is for society administrators. Please use Mera Ghar
+/// Resident or Mera Ghar Guard app." The Logout button calls
 /// `authStateProvider.notifier.logout()` which clears creds and
 /// flips state to unauthenticated; the router redirect chain then
 /// pushes the user back to /login.
@@ -114,7 +114,7 @@ class _WrongAppScreenState extends ConsumerState<WrongAppScreen> {
           body:
               'Super admin features (multi-society management, platform '
               'settings, legal documents) are available on the admin '
-              'web. Open https://admin.eassy.life on a desktop browser '
+              'web. Open https://meraghar.amtariksha.com on a desktop browser '
               'to continue.',
         );
       case 'no_societies':
@@ -123,7 +123,7 @@ class _WrongAppScreenState extends ConsumerState<WrongAppScreen> {
           heading: 'No societies linked',
           body:
               'Your account is not linked to any society yet. Contact '
-              'your community administrator or Eassy support to be '
+              'your community administrator or Mera Ghar support to be '
               'added before signing in to the admin app.',
         );
       case 'not_admin_role':
@@ -133,7 +133,7 @@ class _WrongAppScreenState extends ConsumerState<WrongAppScreen> {
           heading: 'Wrong app for this account',
           body:
               'This app is for society administrators. Please use '
-              'Eassy Resident or Eassy Guard app.',
+              'Mera Ghar Resident or Mera Ghar Guard app.',
         );
     }
   }
