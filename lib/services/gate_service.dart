@@ -60,9 +60,15 @@ class GateService {
     return <String, dynamic>{'items': items, 'total': total};
   }
 
-  Future<Map<String, dynamic>> collectParcel(String id) async {
+  Future<Map<String, dynamic>> collectParcel(
+    String id, {
+    required String collectedByName,
+  }) async {
+    // Backend .refine() rejects an empty body — one of
+    // collected_by_name / collected_by_user_id is required.
     final response = await _api.patch<Map<String, dynamic>>(
       '/gate/parcels/$id/collect',
+      data: {'collected_by_name': collectedByName},
     );
     return response.data!;
   }

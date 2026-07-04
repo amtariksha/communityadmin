@@ -242,7 +242,7 @@ class NotificationService {
   Future<NotificationPreferences> getPreferences() async {
     try {
       final res = await _api.get<Map<String, dynamic>>(
-        '/users/me/notification-settings',
+        '/notifications/me/settings',
       );
       final data = res.data!['data'] as Map<String, dynamic>? ?? {};
       return NotificationPreferences.fromJson(data);
@@ -255,7 +255,7 @@ class NotificationService {
     NotificationPreferences prefs,
   ) async {
     final res = await _api.patch<Map<String, dynamic>>(
-      '/users/me/notification-settings',
+      '/notifications/me/settings',
       data: prefs.toJson(),
     );
     final data = res.data!['data'] as Map<String, dynamic>? ?? prefs.toJson();

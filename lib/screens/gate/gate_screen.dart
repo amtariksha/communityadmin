@@ -62,6 +62,11 @@ class _VisitorsTabState extends ConsumerState<_VisitorsTab> {
   List<dynamic> _visitors = [];
   bool _isLoading = true;
 
+  // Visitor ids with a check-in/check-out request currently outstanding.
+  // Guards the per-row buttons so a double-tap can't fire concurrent
+  // PATCHes for the same visitor.
+  final Set<String> _inFlight = <String>{};
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +91,8 @@ class _VisitorsTabState extends ConsumerState<_VisitorsTab> {
   }
 
   Future<void> _checkIn(String id) async {
+    if (_inFlight.contains(id)) return;
+    setState(() => _inFlight.add(id));
     try {
       await ref.read(gateServiceProvider).checkInVisitor(id);
       _load();
@@ -95,10 +102,14 @@ class _VisitorsTabState extends ConsumerState<_VisitorsTab> {
           const SnackBar(content: Text('Failed to check in')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _inFlight.remove(id));
     }
   }
 
   Future<void> _checkOut(String id) async {
+    if (_inFlight.contains(id)) return;
+    setState(() => _inFlight.add(id));
     try {
       await ref.read(gateServiceProvider).checkOutVisitor(id);
       _load();
@@ -108,6 +119,8 @@ class _VisitorsTabState extends ConsumerState<_VisitorsTab> {
           const SnackBar(content: Text('Failed to check out')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _inFlight.remove(id));
     }
   }
 
@@ -208,7 +221,9 @@ class _VisitorsTabState extends ConsumerState<_VisitorsTab> {
                       children: [
                         if (status == 'approved')
                           TextButton.icon(
-                            onPressed: () => _checkIn(id),
+                            onPressed: _inFlight.contains(id)
+                                ? null
+                                : () => _checkIn(id),
                             icon: const Icon(Icons.login, size: 18),
                             label: const Text('Check In'),
                           ),
@@ -216,7 +231,9 @@ class _VisitorsTabState extends ConsumerState<_VisitorsTab> {
                           const SizedBox(width: 8),
                         if (status == 'pending' || status == 'approved')
                           TextButton.icon(
-                            onPressed: () => _checkOut(id),
+                            onPressed: _inFlight.contains(id)
+                                ? null
+                                : () => _checkOut(id),
                             icon: const Icon(Icons.logout, size: 18),
                             label: const Text('Check Out'),
                           ),
@@ -229,7 +246,9 @@ class _VisitorsTabState extends ConsumerState<_VisitorsTab> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton.icon(
-                          onPressed: () => _checkOut(id),
+                          onPressed: _inFlight.contains(id)
+                              ? null
+                              : () => _checkOut(id),
                           icon: const Icon(Icons.logout, size: 18),
                           label: const Text('Check Out'),
                         ),
@@ -282,8 +301,51 @@ class _ParcelsTabState extends ConsumerState<_ParcelsTab> {
   }
 
   Future<void> _collect(String id) async {
+    // Backend requires who collected the parcel — prompt for a name.
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            // Backend enforces a 2-character minimum — mirror it here so a
+            // too-short name can't round-trip to a 400.
+            final trimmed = controller.text.trim();
+            final isValid = trimmed.length >= 2;
+            return AlertDialog(
+              title: const Text('Collected by'),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                onChanged: (_) => setDialogState(() {}),
+                decoration: InputDecoration(
+                  hintText: 'Collector name (required)',
+                  errorText: trimmed.isNotEmpty && !isValid
+                      ? 'Enter at least 2 characters'
+                      : null,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed:
+                      isValid ? () => Navigator.pop(ctx, trimmed) : null,
+                  child: const Text('Confirm'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (name == null || name.trim().length < 2) return;
     try {
-      await ref.read(gateServiceProvider).collectParcel(id);
+      await ref
+          .read(gateServiceProvider)
+          .collectParcel(id, collectedByName: name);
       _load();
     } catch (e) {
       if (mounted) {

@@ -93,27 +93,40 @@ class _ApprovalsAdminScreenState
   }
 }
 
-class _RequestCard extends ConsumerWidget {
+class _RequestCard extends ConsumerStatefulWidget {
   final Map<String, dynamic> request;
   final String currentStatus;
   const _RequestCard({required this.request, required this.currentStatus});
 
-  Future<void> _approve(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<_RequestCard> createState() => _RequestCardState();
+}
+
+class _RequestCardState extends ConsumerState<_RequestCard> {
+  // Guards against a double-tap firing concurrent approve()/reject()
+  // calls while the first request is still in flight.
+  bool _busy = false;
+
+  Future<void> _approve(BuildContext context) async {
+    if (_busy) return;
+    setState(() => _busy = true);
     try {
       await ref
           .read(approvalServiceProvider)
-          .approve(request['id'].toString());
-      ref.invalidate(approvalsListProvider(currentStatus));
+          .approve(widget.request['id'].toString());
+      ref.invalidate(approvalsListProvider(widget.currentStatus));
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _reject(BuildContext context, WidgetRef ref) async {
+  Future<void> _reject(BuildContext context) async {
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) {
@@ -144,17 +157,21 @@ class _RequestCard extends ConsumerWidget {
       },
     );
     if (reason == null || reason.isEmpty) return;
+    if (_busy) return;
+    setState(() => _busy = true);
     try {
       await ref
           .read(approvalServiceProvider)
-          .reject(request['id'].toString(), reason: reason);
-      ref.invalidate(approvalsListProvider(currentStatus));
+          .reject(widget.request['id'].toString(), reason: reason);
+      ref.invalidate(approvalsListProvider(widget.currentStatus));
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -166,7 +183,8 @@ class _RequestCard extends ConsumerWidget {
       .join(' ');
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final request = widget.request;
     final type = request['request_type']?.toString() ?? '';
     final summary = request['entity_summary']?.toString();
     final requester = request['requester_name']?.toString();
@@ -174,8 +192,8 @@ class _RequestCard extends ConsumerWidget {
         DateTime.tryParse(request['created_at']?.toString() ?? '');
     final level = request['approval_level'];
     final maxLevels = request['max_levels'];
-    final isPending = currentStatus == 'pending' ||
-        currentStatus == 'partially_approved';
+    final isPending = widget.currentStatus == 'pending' ||
+        widget.currentStatus == 'partially_approved';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -231,7 +249,7 @@ class _RequestCard extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   OutlinedButton.icon(
-                    onPressed: () => _reject(context, ref),
+                    onPressed: _busy ? null : () => _reject(context),
                     icon: const Icon(Icons.close, size: 18),
                     label: const Text('Reject'),
                     style: OutlinedButton.styleFrom(
@@ -239,7 +257,7 @@ class _RequestCard extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
-                    onPressed: () => _approve(context, ref),
+                    onPressed: _busy ? null : () => _approve(context),
                     icon: const Icon(Icons.check, size: 18),
                     label: const Text('Approve'),
                     style: ElevatedButton.styleFrom(

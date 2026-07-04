@@ -130,7 +130,8 @@ class PushService {
     if (token == null) return;
     try {
       await _api.delete<Map<String, dynamic>>(
-        '/notifications/devices?token=$token',
+        '/notifications/devices',
+        data: {'token': token},
       );
     } catch (e) {
       if (kDebugMode) debugPrint('[push] unregister failed: $e');

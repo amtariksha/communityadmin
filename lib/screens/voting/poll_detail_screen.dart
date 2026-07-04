@@ -40,13 +40,16 @@ class PollDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Poll')),
       body: async.when(
         data: (poll) {
-          final title = poll['title']?.toString() ?? 'Poll';
-          final desc = poll['description']?.toString();
-          final status = poll['status']?.toString() ?? 'draft';
-          final options = (poll['options'] as List<dynamic>?)
-                  ?.cast<Map<String, dynamic>>() ??
-              [];
-          final totalVotes = poll['total_votes'] ?? 0;
+          // Service returns {poll, results, has_voted, is_eligible} —
+          // unwrap the poll row + results list off the wrapper.
+          final pollRow = (poll['poll'] as Map?) ?? {};
+          final results = ((poll['results'] as List?) ?? [])
+              .cast<Map<String, dynamic>>();
+          final title = pollRow['title']?.toString() ?? 'Poll';
+          final desc = pollRow['description']?.toString();
+          final status = pollRow['status']?.toString() ?? 'draft';
+          final options = results;
+          final totalVotes = pollRow['total_votes'] ?? 0;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -123,7 +126,7 @@ class _OptionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = option['label']?.toString() ?? '';
-    final votes = (option['votes'] as num?)?.toInt() ?? 0;
+    final votes = (option['count'] as num?)?.toInt() ?? 0;
     final pct = totalVotes == 0 ? 0.0 : (votes / totalVotes);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),

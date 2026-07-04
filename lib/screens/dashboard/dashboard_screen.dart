@@ -121,16 +121,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                           _StatCard(
                             title: 'Occupied',
-                            value: '${_stats?['occupied'] ?? _stats?['occupied_percent'] ?? 0}%',
+                            value: _formatPercent(
+                              _stats?['occupied_percent'] ??
+                                  _stats?['occupiedPercent'],
+                            ),
                             icon: Icons.people,
                             color: AppTheme.successColor,
                           ),
                           _StatCard(
                             title: 'Pending Dues',
                             value: _formatCurrency(
-                              _stats?['pending_dues'] ??
-                                  _stats?['pendingDues'] ??
-                                  0,
+                              _stats?['pending_dues'] ?? _stats?['pendingDues'],
                             ),
                             icon: Icons.account_balance_wallet,
                             color: AppTheme.warningColor,
@@ -190,13 +191,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   String _formatCurrency(dynamic amount) {
-    final value = (amount is num) ? amount.toDouble() : 0.0;
+    // pg NUMERIC may arrive as a String; null means "unavailable".
+    final value = amount is num
+        ? amount.toDouble()
+        : (amount is String ? double.tryParse(amount) : null);
+    if (value == null) return 'N/A';
     final formatter = NumberFormat.compactCurrency(
       locale: 'en_IN',
       symbol: '\u20B9',
       decimalDigits: 0,
     );
     return formatter.format(value);
+  }
+
+  String _formatPercent(dynamic percent) {
+    final value = percent is num
+        ? percent.toDouble()
+        : (percent is String ? double.tryParse(percent) : null);
+    if (value == null) return 'N/A';
+    return '${value.round()}%';
   }
 }
 
