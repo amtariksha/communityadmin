@@ -97,49 +97,59 @@ class DashboardService {
     }
   }
 
-  /// Page size used when summing overdue balances. If the fetched count
-  /// reaches this cap the list is likely truncated and the sum would
-  /// understate dues — we surface "N/A" instead (see [_sumOverdueBalances]).
-  static const int _overduePageLimit = 200;
+  /// Page size used when summing overdue balances: the `/invoices` list
+  /// cap (100 rows). A bigger page is refused with a 400.
+  static const int _overduePageLimit = 100;
 
-  /// Sum of outstanding balances across overdue invoices. Returns null
-  /// when the list can't be fetched, so the UI shows "N/A" instead of
-  /// a misleading ₹0. Also returns null when the page is full
-  /// ([_overduePageLimit]) — a truncated page would silently understate
-  /// pending dues, so an honest "N/A" beats a wrong-but-plausible figure.
+  /// Pages read before giving up (1,000 overdue invoices).
+  static const int _overdueMaxPages = 10;
+
+  /// Sum of outstanding balances across overdue invoices, read a page at
+  /// a time. Returns null when a page can't be fetched, or when 1,000 or
+  /// more invoices are overdue, so the UI shows "N/A" instead of a
+  /// misleading ₹0 or an understated figure.
   Future<double?> _sumOverdueBalances() async {
     try {
-      final response = await _api.get<Map<String, dynamic>>(
-        '/invoices',
-        queryParameters: {
-          'page': 1,
-          'limit': _overduePageLimit,
-          'status': 'overdue',
-        },
-      );
-      final raw = response.data ?? const <String, dynamic>{};
-      final items = (raw['data'] as List<dynamic>?) ??
-          (raw['items'] as List<dynamic>?) ??
-          const <dynamic>[];
-      // Full page → likely more overdue invoices than we fetched. Summing
-      // only this page would understate dues, so surface it as unavailable.
-      if (items.length >= _overduePageLimit) return null;
       var sum = 0.0;
-      for (final item in items) {
-        if (item is! Map) continue;
-        // pg NUMERIC arrives as a String — parse at the boundary.
-        final balance = _asNum(item['balance'] ??
-                item['balance_due'] ??
-                item['amount_due'] ??
-                item['total_amount']) ??
-            0;
-        sum += balance;
+      for (var page = 1; page <= _overdueMaxPages; page++) {
+        final items = await _overduePage(page);
+        sum += _sumBalances(items);
+        if (items.length < _overduePageLimit) return sum;
       }
-      return sum;
+      return null;
     } catch (e) {
       if (kDebugMode) debugPrint('[dashboard] pending dues failed: $e');
       return null;
     }
+  }
+
+  Future<List<dynamic>> _overduePage(int page) async {
+    final response = await _api.get<Map<String, dynamic>>(
+      '/invoices',
+      queryParameters: {
+        'page': page,
+        'limit': _overduePageLimit,
+        'status': 'overdue',
+      },
+    );
+    final raw = response.data ?? const <String, dynamic>{};
+    return (raw['data'] as List<dynamic>?) ??
+        (raw['items'] as List<dynamic>?) ??
+        const <dynamic>[];
+  }
+
+  double _sumBalances(List<dynamic> items) {
+    var sum = 0.0;
+    for (final item in items) {
+      if (item is! Map) continue;
+      // pg NUMERIC arrives as a String — parse at the boundary.
+      sum += _asNum(item['balance'] ??
+              item['balance_due'] ??
+              item['amount_due'] ??
+              item['total_amount']) ??
+          0;
+    }
+    return sum;
   }
 
   /// Count of open tickets from `/tickets` pagination `total`.
