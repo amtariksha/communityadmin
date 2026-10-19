@@ -95,7 +95,6 @@ class Society {
       'facility_supervisor',
       'security_supervisor',
       'accountant',
-      'guard_supervisor',
     };
     for (final r in roles) {
       if (adminAllowlist.contains(r)) return r;

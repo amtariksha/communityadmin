@@ -17,7 +17,6 @@ const List<String> kAdminRoles = <String>[
   'facility_supervisor',
   'security_supervisor',
   'accountant',
-  'guard_supervisor',
 ];
 
 /// Filter a user's society list down to the ones where the user has
