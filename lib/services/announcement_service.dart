@@ -48,6 +48,9 @@ class AnnouncementService {
         'target_audience': targetAudience,
         'publish_now': publishNow,
         'is_pinned': isPinned,
+        // ANN-11 — every new notice is Official or Promotional; this app
+        // posts society notices.
+        'classification': 'official',
       },
     );
     return response.data!['data'] as Map<String, dynamic>;
