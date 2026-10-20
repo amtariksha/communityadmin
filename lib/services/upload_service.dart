@@ -9,6 +9,9 @@ import 'package:community_admin/services/api_client.dart';
 /// 1. POST /upload/presigned-url
 /// 2. PUT bytes directly to S3 / R2 / MinIO
 /// 3. Persist the returned `fileUrl`
+///
+/// The bucket is private: show or open a stored file through
+/// `StoredFileLinks` (lib/core/files), never its raw `fileUrl`.
 class UploadService {
   final ApiClient _api;
   final Dio _s3 = Dio();
@@ -70,15 +73,6 @@ class UploadService {
       fileUrl: data['fileUrl'] as String,
       key: data['key'] as String,
     );
-  }
-
-  Future<String> requestDownloadUrl(String key) async {
-    final response = await _api.post<Map<String, dynamic>>(
-      '/upload/download-url',
-      data: {'key': key},
-    );
-    final data = response.data!['data'] as Map<String, dynamic>;
-    return data['downloadUrl'] as String;
   }
 
   Future<void> delete(String key) async {

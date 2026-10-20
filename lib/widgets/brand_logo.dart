@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:community_admin/config/brand_config.dart';
+import 'package:community_admin/core/files/stored_image.dart';
 
 /// Shows the logged-in society's runtime logo (`logo_url`, set by the
 /// super admin — backend migration 099) when available, falling back
-/// to the build-time bundled brand logo otherwise.
+/// to the build-time bundled brand logo otherwise (also while the logo's
+/// signed link resolves, or when it is not available).
 ///
 /// Used wherever the admin app surfaces "the society's logo" — the
 /// dashboard app bar most notably.
@@ -25,17 +27,12 @@ class BrandLogo extends StatelessWidget {
       fit: BoxFit.contain,
     );
 
-    final url = logoUrl?.trim();
-    if (url == null || url.isEmpty) return fallback;
-
-    return Image.network(
-      url,
+    return StoredNetworkImage(
+      url: logoUrl,
       width: size,
       height: size,
       fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => fallback,
-      loadingBuilder: (context, child, progress) =>
-          progress == null ? child : fallback,
+      placeholder: (_) => fallback,
     );
   }
 }

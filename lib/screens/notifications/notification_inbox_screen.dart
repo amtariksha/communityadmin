@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:community_admin/config/theme.dart';
+import 'package:community_admin/core/files/open_stored_file.dart';
 import 'package:community_admin/core/notifications/categories.dart';
 import 'package:community_admin/providers/notification_provider.dart';
 import 'package:community_admin/providers/service_providers.dart';
 import 'package:community_admin/services/notification_service.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Admin notification inbox.
 ///
@@ -21,7 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// Tap a row → marks read + routes via `routeForData` (catalog-driven).
 /// Inbox cards for `monthly_report` render Download buttons per
-/// attachment URL via `url_launcher`.
+/// attachment URL, opened through a signed link ([openStoredFile]).
 class NotificationInboxScreen extends ConsumerStatefulWidget {
   const NotificationInboxScreen({super.key});
 
@@ -159,18 +159,7 @@ class _NotificationInboxScreenState
     return const [];
   }
 
-  Future<void> _openUrl(String url) async {
-    final uri = Uri.tryParse(url);
-    if (uri == null) return;
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open: $e')),
-      );
-    }
-  }
+  Future<void> _openUrl(String url) => openStoredFile(context, url);
 
   bool _matchesFilter(AppNotification n) {
     if (_activeFilter == _Filter.all) {
