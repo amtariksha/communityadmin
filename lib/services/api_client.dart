@@ -1,11 +1,11 @@
 import 'package:community_admin/config/constants.dart';
+import 'package:community_admin/core/network/redacting_log_interceptor.dart';
 import 'package:community_admin/services/auth_token_store.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// Single-instance HTTP client for the admin-mobile app.
 ///
@@ -117,18 +117,10 @@ class ApiClient {
       },
     ));
 
+    // Debug builds only (kDebugMode is false in release and profile builds,
+    // so the logger is compiled out): secrets are taken out of every line.
     if (kDebugMode) {
-      _dio.interceptors.add(
-        PrettyDioLogger(
-          requestHeader: true,
-          requestBody: true,
-          responseBody: true,
-          responseHeader: false,
-          error: true,
-          compact: true,
-          maxWidth: 90,
-        ),
-      );
+      _dio.interceptors.add(RedactingLogInterceptor());
     }
 
     _initialised = true;
